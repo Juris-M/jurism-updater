@@ -6,13 +6,18 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "bluebird": "^3.5.1",
     "body-parser": "~1.18.2",
     "cookie-parser": "~1.4.3",
+    "crlf-normalize": "^1.0.0",
     "debug": "~2.6.9",
+    "dugite": "^1.58.0",
     "express": "~4.15.5",
     "hbs": "~4.0.1",
+    "libxml-to-js": "^0.3.12",
     "morgan": "~1.9.0",
     "mysql": "^2.15.0",
-    "serve-favicon": "~2.4.5"
+    "serve-favicon": "~2.4.5",
+    "xml": "^1.0.1"
   }
 }

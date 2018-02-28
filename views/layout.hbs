@@ -3,8 +3,10 @@
   <head>
     <title>{{title}}</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/javascripts/admin-page.js"></script>
   </head>
-  <body>
+  <body onLoad="setListeners();">
     {{{body}}}
+    <script src="/javascripts/jquery-3.3.1.min.js" type="text/javascript"></script>
   </body>
 </html>

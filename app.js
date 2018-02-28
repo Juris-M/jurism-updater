@@ -5,24 +5,13 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+var debug = require('debug')('jurism-updater:server');
+
 var index = require('./routes/index');
-var users = require('./routes/users');
-
-var mysql = require('mysql')
-
-var connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'bennett',
-  password: 'Lnosiatl',
-  database: 'translators'
-})
-
-connection.connect(function(err) {
-  if (err) throw err
-  console.log('You are now connected...')
-})
-
-
+var admin = require('./routes/admin');
+var report = require('./routes/report');
+var updated = require('./routes/updated');
+var keyreturn = require('./routes/keyreturn');
 
 var app = express();
 
@@ -39,7 +28,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/users', users);
+app.use('/admin', admin);
+app.use('/report', report);
+app.use('/updated', updated);
+app.use('/keyreturn', keyreturn);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
