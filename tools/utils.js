@@ -277,7 +277,8 @@ function translatorXmlJS (obj) {
         if (info.jsonSkip) continue;
         if (!obj[info.name]) continue;
         if (info.name === 'lastUpdated') {
-            obj[info.name] = getUtcDateTime(obj[info.name]).human;
+            var lastUpdated = Math.round(parseInt(obj[info.name], 10)*1000)
+            obj[info.name] = getUtcDateTime(lastUpdated).human;
         }
         if (info.name === 'maxVersion') {
             console.log('maxVersion: ' + obj[info.name])
