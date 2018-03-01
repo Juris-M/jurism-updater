@@ -27,7 +27,7 @@ var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 */
 
 /* POST fetch files after a given date */
-router.post('/', bodyParser.urlencoded('*/*'), function(req, res, next) {
+router.post('/', bodyParser.urlencoded({ type: '*/*', extended: true }), function(req, res, next) {
     res.format({
         'application/xml': function() {
             if (undefined === req.query.last) {
