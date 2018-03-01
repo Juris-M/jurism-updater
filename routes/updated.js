@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var bodyParser = require('body-parser');
 
 var debug = require('debug')('jurism-updater:server');
 var mysql = require('mysql')
@@ -24,24 +25,25 @@ for (let id in styles) {
 }
 var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 */
-/* GET fetch translators after a given date */
-router.get('/', function(req, res, next) {
+
+/* POST fetch files after a given date */
+router.post('/', bodyParser.urlencoded('*/*'), function(req, res, next) {
     res.format({
-        'text/xml': function() {
-            console.log("GO1")
-            if (undefined !== req.query.last) {
-                console.log("GO2")
-                var dateSecs = parseInt(req.query.last, 10);
-                var sql = utils.sqlTranslatorsAfterDate();
+        'application/xml': function() {
+            if (undefined === req.query.last) {
+                var sql = "SELECT * FROM translators;"
                 connection.query(sql, [dateSecs], function(error, results, fields){
-                    console.log("GO3")
-                    if (error) {
-                        throw error;
-                    }
+                    utils.sqlFail(error);
                     res.send(utils.makeXml(results));
                 })
-                
-            }
+            } else {
+                var dateSecs = parseInt(req.query.last, 10);
+                var sql = "SELECT * FROM translators WHERE lastUpdated>?;"
+                connection.query(sql, [dateSecs], function(error, results, fields){
+                    utils.sqlFail(error);
+                    res.send(utils.makeXml(results));
+                })
+            } 
         }
     });
 });

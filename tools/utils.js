@@ -8,6 +8,7 @@ var lnfix = require('crlf-normalize');
 var xml = require('xml');
 var mysql = require('mysql');
 var debug = require('debug')('jurism-updater:server');
+var rand = require('unique-random')(1, 65000);
 
 var jmDir = path.join(__dirname, '..', 'jurism');
 var transDir = path.join(__dirname, '..', 'translators');
@@ -42,8 +43,11 @@ function getBug(res, id){
     connection.query(sql, [id], function(error, results, fields){
         sqlFail(error);
         console.log("setting up ret")
+        var jsdate = (parseInt(results[0].date, 10)*1000);
+        var repoDate = getUtcDateTime(jsdate);
         var ret = {
             id: results[0].id,
+            date: repoDate.human,
             txt: results[0].txt.toString()
         }
         res.send(ret);
@@ -56,11 +60,13 @@ function returnBugList(res) {
     var sql = "DELETE FROM bugs WHERE date<?"
     connection.query(sql, [twoWeeksAgo], function(error, results, fields) {
         sqlFail(error);
-        var sql = "SELECT id FROM bugs;";
+        var sql = "SELECT id,date FROM bugs;";
         connection.query(sql, function(error, results, fields){
             var retlst = [];
             for (var obj of results) {
-                retlst.push(obj.id)
+                var jsdate = ((parseInt(obj.date, 10) + 32400)*1000);
+                var repoDate = getUtcDateTime(jsdate);
+                retlst.push([repoDate.human, obj.id])
             }
             res.send(retlst);
         })
@@ -120,24 +126,36 @@ function squashFields(info) {
     return info;
 }
 
+
+/*
+ * From Zotero source
+ */
+/*
+var TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator",
+                                      "target", "priority", "lastUpdated"];
+// Properties that are preserved if present
+var TRANSLATOR_OPTIONAL_PROPERTIES = ["targetAll", "browserSupport", "minVersion", "maxVersion",
+                                      "inRepository", "configOptions", "displayOptions",
+                                      "hiddenPrefs", "itemType"];
+// Properties that are passed from background to inject page in connector
+var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.
+                                    concat(["targetAll", "browserSupport", "code", "runMode", "itemType", "inRepository"]);
+*/
+
+
 var translatorFields = [
     {
         name: "translatorID",
         spec: "CHAR(64) PRIMARY KEY",
-        xmlName: "translatorID",
+        xmlName: "id",
         xmlType: 'attribute'
         
     },
     {
-        name: "translatorFilename",
-        spec: " VARCHAR(1024) CHARACTER SET utf8mb4",
-        jsonSkip: true
-    },
-    {
-        name: "creator",
-        spec: "VARCHAR(1024) CHARACTER SET utf8mb4",
-        xmlName: "creator",
-        xmlType: "element"
+        name: "translatorType",
+        spec: " TINYINT NOT NULL",
+        xmlName: 'type',
+        xmlType: 'attribute'
     },
     {
         name: "label",
@@ -146,10 +164,28 @@ var translatorFields = [
         xmlType: 'element'
     },
     {
+        name: "creator",
+        spec: "VARCHAR(1024) CHARACTER SET utf8mb4",
+        xmlName: "creator",
+        xmlType: "element"
+    },
+    {
         name: "target",
         spec: " VARCHAR(4096)",
         xmlName: 'target',
         xmlType: 'element'
+    },
+    {
+        name: "priority",
+        spec:  "INT",
+        xmlName: 'priority',
+        xmlType: 'element'
+    },
+    {
+        name: "lastUpdated",
+        spec: "INT",
+        xmlName: 'lastUpdated',
+        xmlType: 'attribute'
     },
     {
         name: "minVersion",
@@ -163,33 +199,15 @@ var translatorFields = [
         jsonSkip: true
     },
     {
-        name: "priority",
-        spec:  "INT",
-        xmlName: 'priority',
-        xmlType: 'element'
-    },
-    {
         name: "inRepository",
         spec: "TINYINT",
         force: true,
         jsonSkip: true
     },
     {
-        name: "translatorType",
-        spec: " TINYINT NOT NULL",
-        xmlName: 'type',
-        xmlType: 'attribute'
-    },
-    {
         name: "browserSupport",
         spec: "VARCHAR(64)",
         xmlName: 'browserSupport',
-        xmlType: 'attribute'
-    },
-    {
-        name: "lastUpdated",
-        spec: "INT",
-        xmlName: 'lastUpdated',
         xmlType: 'attribute'
     },
     {
@@ -203,6 +221,12 @@ var translatorFields = [
         spec: "VARCHAR(1024)",
         xmlName: 'configOptions',
         xmlType: 'elementObject'
+    },
+    {
+        name: "code",
+        spec: "MEDIUMBLOB",
+        xmlName: 'code',
+        xmlType: 'element'
     }
 ]
 
@@ -244,53 +268,64 @@ function sqlLastUpdatedMaxStatement() {
     return "SELECT MAX(lastUpdated) AS repotime FROM translators;"
 }
 
-function sqlTranslatorsAfterDate() {
-    return "SELECT * FROM translators WHERE lastUpdated<?;"
-}
-
 function translatorXmlJS (obj) {
     var ret = {
         translator: []
     };
     var attr = {}
     for (var info of translatorFields) {
-        if (info.type === 'skip') continue;
+        if (info.jsonSkip) continue;
         if (!obj[info.name]) continue;
+        if (info.name === 'lastUpdated') {
+            obj[info.name] = getUtcDateTime(obj[info.name]).human;
+        }
+        if (info.name === 'maxVersion') {
+            console.log('maxVersion: ' + obj[info.name])
+        }
+        //if (info.name === 'code') {
+        //    obj[info.name] = 'code goes here';
+        //}
         var addIn = {};
-        if (info.type === 'attribute') {
-            attr[info.key] = obj[key];
-        } else if (info.type === 'element') {
-            addIn[info.key] = obj[key]
+        if (info.xmlType === 'attribute') {
+            attr[info.xmlName] = obj[info.name];
+        } else if (info.xmlType === 'element') {
+            addIn[info.xmlName] = obj[info.name]
             ret.translator.push(addIn)
         } else {
-            addIn[info.key] = JSON.stringify(obj[key]);
+            addIn[info.xmlName] = JSON.stringify(obj[info.name]);
             ret.translator.push(addIn)
         }
     }
-    ret.translator.push({
-        _attr: attr
-    })
+    ret.translator = [{
+        "_attr": attr
+    }].concat(ret.translator);
     return ret;
 }
 
 function xmlXmlJS(result) {
+    var currentTime = Math.round(new Date().getTime()/1000);
     var outerXmlObj = {
         xml: [
             {
-                currentTime: XXX
+                currentTime: currentTime
             },
             {
                 pdftools: [
                     {
                         '_attr': {
-                            version: "3.0.4"
+                            version: "3.04"
                         }
                     }
                 ]
             }
         ]
     }
-    for (var info of result) {
+    for (var res of result) {
+        var info = {};
+        for (var key in res) {
+            if (undefined === res[key] || null === res[key]) continue;
+            info[key] = res[key].toString()
+        }
         outerXmlObj.xml.push(translatorXmlJS(info));
     }
     return outerXmlObj;
@@ -313,11 +348,14 @@ function pad(d, fun, addMe) {
 }
 
 function getUtcDateTime(dval) {
+    console.log("?? "+dval);
     var ret = "";
     if (typeof dval === "string") {
         dval = dval.trim();
         if ( dval.match(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9]:[0-9]:[0-9]$/)) {
             dval = dval.replace(" ", "T") + "Z";
+        } else if (!isNaN(parseInt(dval))) {
+            dval = parseInt(dval);
         }
     }
     var d = new Date(dval);
@@ -336,7 +374,9 @@ function getUtcDateTime(dval) {
 }
 
 function addFile(fn, repoDate) {
-    var info = getInfoAndTranslator(fn).info;
+    var data = getInfoAndTranslator(fn);
+    var info = data.info;
+    info.code = data.translator;
     info.lastUpdated = repoDate.machine;
     var params = sqlTranslatorInsertParams(info);
     var sql = sqlTranslatorInsertStatement;
@@ -400,7 +440,6 @@ module.exports = {
     sqlTranslatorInsertStatement: sqlTranslatorInsertStatement,
     sqlTranslatorCreateStatement: sqlTranslatorCreateStatement,
     sqlLastUpdatedMaxStatement: sqlLastUpdatedMaxStatement,
-    sqlTranslatorsAfterDate: sqlTranslatorsAfterDate,
     makeXml: makeXml,
     getUtcDateTime: getUtcDateTime,
     addFile: addFile,

@@ -46,13 +46,13 @@ function setListeners() {
                     var li = $('<li/>')
                         .appendTo(uList);
                     var anchor = $('<a/>')
-                        .attr('id', bugs[i])
+                        .attr('id', bugs[i][1])
                         .appendTo(li);
-                    anchor.append(bugs[i]);
+                    anchor.append(bugs[i][0] + " :: D" + bugs[i][1]);
                     anchor.on('click', function(event){
                         $('.buglist').hide();
-                        $.getJSON('/admin/bugs?id=' + bugs[i], function(buginfo){
-                            $('#bugtitle').empty().append("D" + buginfo.id)
+                        $.getJSON('/admin/bugs?id=' + bugs[i][1], function(buginfo){
+                            $('#bugtitle').empty().append(buginfo.date + " :: D" + buginfo.id)
                             $('#bugtext').empty().append(buginfo.txt);
                             $('.showbug').show();
                         })
