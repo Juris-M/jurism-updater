@@ -1,14 +1,38 @@
+'use strict'
+
 var fs = require('fs');
 var path = require('path');
 var xmlToJS = require('libxml-to-js');
 var xml = require('xml');
 var lnfix = require('crlf-normalize');
 var xml = require('xml');
+var mysql = require('mysql');
+var debug = require('debug')('jurism-updater:server');
 
 var jmDir = path.join(__dirname, '..', 'jurism');
 var transDir = path.join(__dirname, '..', 'translators');
 var transFile = function(fn) {
     return path.join(transDir, fn);
+}
+var hashPath = path.join(__dirname, '..', 'REPO_HASH.txt');
+
+var connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'bennett',
+    password: 'Lnosiatl',
+    database: 'translators',
+    charset: 'utf8mb4'
+})
+
+connection.connect(function(err) {
+  if (err) throw err
+  debug('Connecting from utils.js ...')
+})
+
+function sqlFail(error) {
+    if (error) {
+        console.log("OOPS: "+error);
+    }
 }
 
 function getInfoAndTranslator(fn) {
@@ -20,7 +44,7 @@ function getInfoAndTranslator(fn) {
     txt = lnfix.crlf(txt, lnfix.LF);
     txt = txt.split('\n');
     for (var i=0, ilen=txt.length; i<ilen; i++) {
-        line = txt[i];
+        var line = txt[i];
         if (line.trim() === "" || line.slice(0, 1) === "/") {
             ret.info = JSON.parse(txt.slice(0, i).join('\n'));
             ret.translator = txt.slice(i).join('\n');
@@ -37,14 +61,6 @@ function squashFields(info) {
             if (["displayOptions", "configOptions"].indexOf(key) > -1) {
                 info[key] = JSON.stringify(info[key]);
             }
-            /*
-            if (key === "lastUpdated") {
-                console.log("before: "+info[key]);
-                var dateStr = getUtcDateTime(info[key]).machine;
-                console.log("after: "+dateStr);
-                info[key] = Date.parse(dateStr);
-            }
-            */
         }
     }
     return info;
@@ -146,7 +162,7 @@ function sqlTranslatorCreateStatement() {
     return sql;
 }
 
-function sqlTranslatorInsertStatement() {
+var sqlTranslatorInsertStatement = function() {
     var lst = [];
     var sql = "INSERT INTO translators VALUES ("
     for (var info of translatorFields) {
@@ -155,7 +171,7 @@ function sqlTranslatorInsertStatement() {
     sql += lst.join(',');
     sql += ');';
     return sql;
-}
+}();
 
 function sqlTranslatorInsertParams(info) {
     info = squashFields(info);
@@ -244,7 +260,7 @@ function pad(d, fun, addMe) {
 
 function getUtcDateTime(dval) {
     var ret = "";
-    if (dval === typeof "string") {
+    if (typeof dval === "string") {
         dval = dval.trim();
         if ( dval.match(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9]:[0-9]:[0-9]$/)) {
             dval = dval.replace(" ", "T") + "Z";
@@ -265,14 +281,74 @@ function getUtcDateTime(dval) {
     }
 }
 
+function addFile(fn, repoDate) {
+    var info = getInfoAndTranslator(fn).info;
+    info.lastUpdated = repoDate.machine;
+    var params = sqlTranslatorInsertParams(info);
+    var sql = sqlTranslatorInsertStatement;
+    connection.query(sql, params, function (error, results, fields){
+        sqlFail(error);
+    })
+}
+
+function composeRepoDate(data) {
+    var dateStr = data.split('\n')[0];
+    var repoDate = getUtcDateTime(dateStr);
+    return repoDate;
+}
+
+function removeFile(fn) {
+    var sql = "DELETE from translators WHERE translatorFilename=?";
+    var params = [fn];
+    connection.query(sql, params, function (error, results, fields){
+        sqlFail(error);
+    })
+}
+
+function updateFile(fn, repoDate) {
+    var sql = "UPDATE translators SET lastUpdated=? WHERE translatorFilename=?";
+    var params = [repoDate.machine, fn];
+    connection.query(sql, params, function (error, results, fields){
+        sqlFail(error);
+    })
+}
+
+function readRepoHash() {
+    return fs.readFileSync(hashPath);
+}
+
+function removeRepoHash() {
+    if (fs.existsSync(hashPath)) {
+        fs.unlinkSync(hashPath);
+    }
+}
+
+function hasRepoHash() {
+    if (fs.existsSync(hashPath)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 module.exports = {
     getInfoAndTranslator: getInfoAndTranslator,
     squashFields: squashFields,
     sqlTranslatorInsertParams: sqlTranslatorInsertParams,
-    sqlTranslatorCreateStatement: sqlTranslatorCreateStatement,
     sqlTranslatorInsertStatement: sqlTranslatorInsertStatement,
+    sqlTranslatorCreateStatement: sqlTranslatorCreateStatement,
     sqlLastUpdatedMaxStatement: sqlLastUpdatedMaxStatement,
     sqlTranslatorsAfterDate: sqlTranslatorsAfterDate,
     makeXml: makeXml,
-    getUtcDateTime: getUtcDateTime
+    getUtcDateTime: getUtcDateTime,
+    addFile: addFile,
+    removeFile: removeFile,
+    updateFile: updateFile,
+    sqlFail: sqlFail,
+    connection: connection,
+    removeRepoHash: removeRepoHash,
+    hasRepoHash: hasRepoHash,
+    readRepoHash: readRepoHash,
+    composeRepoDate: composeRepoDate,
+    hashPath: hashPath
 }

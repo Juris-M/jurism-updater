@@ -9,6 +9,7 @@ var debug = require('debug')('jurism-updater:server');
 
 var index = require('./routes/index');
 var admin = require('./routes/admin');
+var refresh = require('./routes/refresh');
 var report = require('./routes/report');
 var updated = require('./routes/updated');
 var keyreturn = require('./routes/keyreturn');
@@ -30,6 +31,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/admin', admin);
 app.use('/report', report);
+app.use('/refresh', refresh);
 app.use('/updated', updated);
 app.use('/keyreturn', keyreturn);
 

@@ -1,8 +1,11 @@
+'use strict'
+
 var fs = require('fs');
 var path = require('path');
-var utils = require('./utils');
 var Promise = require('bluebird');
 var GitProcess = require('dugite').GitProcess
+var debug = require('debug')('jurism-updater:server');
+var utils = require('../tools/utils.js');
 
 var repoPath = path.join(__dirname, '..', 'translators')
 
@@ -11,62 +14,94 @@ var options = {};
 var git = Promise.coroutine(function* (optlist) {
     var res = yield GitProcess.exec(optlist, repoPath, options)
     if (res.exitCode == 0) {
-        return Promise.resolve(res);
+        return Promise.resolve(res.stdout.trim());
     } else {
-        return Promise.reject(res);
+        return Promise.reject(res.stderr);
     }
 })
 
-var gitFail = undefined;
-
 var gitFailInTheEnd = function(err){
-    console.log(err.stderr);
+    debug(err);
     return Promise.resolve(true);
+}
+
+function getHeadDate() {
+    return git([ 'show', '--pretty=format:%aI', '--abbrev-commit', 'HEAD'])
+        .then(function(data){
+            return utils.composeRepoDate(data);
+        })
 }
 
 
 function getRepoDate(fn, cb) {
+    //debug("getRepoDate()");
     return git([ 'rev-list', '-1', 'HEAD', fn ])
-        .then(function(ret){
-                  var hash = ret.stdout.trim();
+        .then(function(data){
+            var hash = data;
             return git([ 'show', '--pretty=format:%aI', '--abbrev-commit', hash]);
-        },gitFail)
-        .then(function(ret){
-                  var dateStr = ret.stdout.split('\n')[0];
-                  var repoDate = utils.getUtcDateTime(dateStr);
-                  return cb(fn, repoDate);
-        },gitFail)
+        })
+        .then(function(data){
+            var dateStr = data.split('\n')[0];
+            var repoDate = utils.getUtcDateTime(dateStr);
+            return cb(fn, repoDate);
+        })
 }
     
-function iterateTranslators(res, cb, done) {
+function iterateTranslators(res, begin_cb, each_cb, end_cb) {
+    debug("iterateTranslators()");
     return git(['pull', 'origin', 'master'])
-        .then(function(ret){
-                  return true;
-        },gitFail)
-        .then(function(ret) {
+        .then(function() {
             var filenames = [];
             for (var fn of fs.readdirSync(repoPath)) {
                 if (fn.slice(-3) !== '.js') continue;
                 filenames.push(fn);
             }
+            if (begin_cb) begin_cb();
             return Promise.each(filenames, function(fn) {
-                return getRepoDate(fn, cb);
+                return getRepoDate(fn, each_cb);
             })
-                },gitFail)
+                })
         .then(function(){
-                  return done(res);
-        },gitFail)
+                  return end_cb(res);
+        })
         .catch(gitFailInTheEnd);
 }
 
-/*
-function demoFun(fn, repoDate) {
-    console.log(repoDate.human + "/" + repoDate.machine + " " + fn);
+function doRepoHash(){
+    return git([ 'rev-list', '--max-count=1', 'HEAD' ])
+        .then(function(data){
+            var hash = data;
+            fs.writeFileSync(utils.hashPath, hash);
+            return Promise.resolve(true);
+        }).catch(function(error){
+            console.log(error);
+        });
 }
 
-iterateTranslators(demoFun);
-*/
+function getChanges(hash) {
+    return git([ 'diff', '--name-status', hash, 'HEAD', '--']);
+}
+
+
+function reportRepoTime(res) {
+    debug("reportRepoTime()");
+    var sql = utils.sqlLastUpdatedMaxStatement();
+    utils.connection.query(sql, function(error, results, fields) {
+        utils.sqlFail(error);
+        var repotime = (parseInt(results[0].repotime, 10) * 1000);
+        var repoDate = utils.getUtcDateTime(repotime);
+        res.send(JSON.stringify(repoDate));
+        doRepoHash()
+            .catch(function(err){
+                debug(err);
+            })
+    });
+}
 
 module.exports = {
-    iterateTranslators: iterateTranslators
+    iterateTranslators: iterateTranslators,
+    doRepoHash: doRepoHash,
+    getHeadDate: getHeadDate,
+    getChanges: getChanges,
+    reportRepoTime: reportRepoTime
 }

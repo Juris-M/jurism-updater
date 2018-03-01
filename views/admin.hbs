@@ -1,21 +1,27 @@
-<h1>{{title}}</h1>
-<p>Operations to control the database of Juris-M translators, used to update translators in clients in the field. Use with care!</p>
+<div class="center">
+  <div class="button">
+    <input id="generate" type="button" value="Rebuild"/>
+  </div>
 
-<div class="button">
-  <input id="generate" type="button" value="Regenerate entire database"/>
+  <div class="button">
+    <input id="refresh" type="button" value="Refresh"/>
+  </div>
+
+  <div class="button">
+    <input id="inspect" type="button" value="Check the Time"/>
+  </div>
+
+  <div class="loader" style="display:none;"></div>
+  <div class="details" style="display:none;">
+    <dl id="repo-date-and-time">
+      <dt>
+        Repo date
+      </dt>
+      <dd id="repo-date">
+      <dt>
+        Repo time
+      </dt>
+      <dd id="repo-time">
+    </dl>
+  </div>
 </div>
-
-<div class="button">
-  <input id="inspect" type="button" value="Query repo time"/>
-</div>
-
-<dl class="details" id="repo-date-and-time" hidden="true">
-  <dt>
-    Repo date
-  </dt>
-  <dd id="repo-date">
-  <dt>
-    Repo time
-  </dt>
-  <dd id="repo-time">
-</dl>

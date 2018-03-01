@@ -15,7 +15,7 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
   if (err) throw err
-  debug('You are now connected...')
+  debug('Connecting from updated ...')
 })
 
 /* From Zotero -- POST body structure to request style updates */
