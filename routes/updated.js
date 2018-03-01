@@ -5,18 +5,7 @@ var debug = require('debug')('jurism-updater:server');
 var mysql = require('mysql')
 var utils = require('../tools/utils.js');
 
-var connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'bennett',
-    password: 'Lnosiatl',
-    database: 'translators',
-    charset: 'utf8mb4'
-})
-
-connection.connect(function(err) {
-  if (err) throw err
-  debug('Connecting from updated ...')
-})
+var connection = utils.connection;
 
 /* From Zotero -- POST body structure to request style updates */
 /*

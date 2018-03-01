@@ -20,7 +20,7 @@ var connection = mysql.createConnection({
     host: 'localhost',
     user: 'bennett',
     password: 'Lnosiatl',
-    database: 'translators',
+    database: 'jurism',
     charset: 'utf8mb4'
 })
 
@@ -32,7 +32,61 @@ connection.connect(function(err) {
 function sqlFail(error) {
     if (error) {
         console.log("OOPS: "+error);
+        throw error;
     }
+}
+
+function getBug(res, id){
+    console.log("in getBug")
+    var sql = "SELECT * from bugs WHERE id=?";
+    connection.query(sql, [id], function(error, results, fields){
+        sqlFail(error);
+        console.log("setting up ret")
+        var ret = {
+            id: results[0].id,
+            txt: results[0].txt.toString()
+        }
+        res.send(ret);
+    })
+}
+
+function returnBugList(res) {
+    var twoWeeksAgo = Math.round(new Date().getTime()/1000);
+    twoWeeksAgo = twoWeeksAgo - 1209600;
+    var sql = "DELETE FROM bugs WHERE date<?"
+    connection.query(sql, [twoWeeksAgo], function(error, results, fields) {
+        sqlFail(error);
+        var sql = "SELECT id FROM bugs;";
+        connection.query(sql, function(error, results, fields){
+            var retlst = [];
+            for (var obj of results) {
+                retlst.push(obj.id)
+            }
+            res.send(retlst);
+        })
+    })
+}
+
+function createBugTable (res) {
+    debug("createBugTable()");
+    var sql = "CREATE TABLE bugs (id CHAR(64) PRIMARY KEY, date INT, txt MEDIUMBLOB)";
+    connection.query(sql, function(error, results, fields){
+        sqlFail(error);
+        returnBugList(res);
+    });
+}
+
+function bugList(res) {
+    debug("bugList()");
+    var sql = "SELECT * FROM information_schema.tables WHERE table_schema = 'jurism' AND table_name = 'bugs' LIMIT 1;"
+    connection.query(sql, function (error, results, fields){
+        sqlFail(error);
+        if (results[0]) {
+            returnBugList(res);
+        } else {
+            createBugTable(res);
+        }
+    })
 }
 
 function getInfoAndTranslator(fn) {
@@ -331,6 +385,14 @@ function hasRepoHash() {
     }
 }
 
+function getRand() {
+    var num = "" + rand();
+    while (num.length < 5) {
+        num = "0" + num;
+    }
+    return num;
+}
+
 module.exports = {
     getInfoAndTranslator: getInfoAndTranslator,
     squashFields: squashFields,
@@ -350,5 +412,8 @@ module.exports = {
     hasRepoHash: hasRepoHash,
     readRepoHash: readRepoHash,
     composeRepoDate: composeRepoDate,
-    hashPath: hashPath
+    hashPath: hashPath,
+    bugList: bugList,
+    getBug: getBug,
+    getRand: getRand
 }

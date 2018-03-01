@@ -3,10 +3,20 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+.showbug {
+    text-align: left;
+}
+
+.buglist {
+    font-size: 130%;
+}
+
+.buglist a {
+    cursor: pointer;
+}
 
 .details {
     text-align: left;
-    display: none;
     text-align: center;
 }
 
@@ -21,6 +31,7 @@ a {
 
 .button input {
     font-size: 180%;
+    cursor: pointer;
 }
 
 .center {
