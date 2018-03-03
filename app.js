@@ -29,8 +29,7 @@ app.use(logger('dev'));
 //app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/styles', express.static(path.join(__dirname, 'jm-styles'), {
+app.use('/updater/styles', express.static(path.join(__dirname, 'jm-styles'), {
     setHeaders: function(res, path, stat) {
         res.set("Access-Control-Allow-Origin", "*");
         res.set("Vary", "Accept-Encoding");
@@ -41,14 +40,15 @@ app.use('/styles', express.static(path.join(__dirname, 'jm-styles'), {
         }
     }
 }));
+app.use('/updater', express.static(path.join(__dirname, 'public')));
 
 
-app.use('/', index);
-app.use('/admin', admin);
-app.use('/report', report);
-app.use('/refresh', refresh);
-app.use('/updated', updated);
-app.use('/keyreturn', keyreturn);
+app.use('/updater/admin', admin);
+app.use('/updater/report', report);
+app.use('/updater/refresh', refresh);
+app.use('/updater/updated', updated);
+app.use('/updater/keyreturn', keyreturn);
+app.use('/updater', index);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
