@@ -12,7 +12,6 @@ var conn = require(pth.fp.connection);
 router.post('/', bodyParser.text({type: '*/*'}), function(req, res, next) {
     res.format({
         'application/xml': function() {
-            console.log("so far, so good?");
             var date = Math.round(new Date().getTime()/1000);
             var rnd = utils.getRand();
             var id = '' + date + '-' + rnd;
