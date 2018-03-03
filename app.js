@@ -30,6 +30,18 @@ app.use(logger('dev'));
 //app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/styles', express.static(path.join(__dirname, 'jm-styles'), {
+    setHeaders: function(res, path, stat) {
+        res.set("Access-Control-Allow-Origin", "*");
+        res.set("Vary", "Accept-Encoding");
+        if (res.req.query.install) {
+            res.set("Content-Type", "application/vnd.citationstyles.style+xml");
+        } else {
+            res.set("Content-Type", "application/octet-stream");
+        }
+    }
+}));
+
 
 app.use('/', index);
 app.use('/admin', admin);
