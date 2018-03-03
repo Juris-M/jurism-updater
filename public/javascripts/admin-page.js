@@ -4,6 +4,7 @@ function setListeners() {
         $('.loader').hide();
         $('.buglist').hide();
         $('.showbug').hide();
+        $('.showerror').hide();
     }
     $('#generate').on('click', function(event){
         hideAll();
@@ -19,10 +20,17 @@ function setListeners() {
         hideAll();
         $('.loader').show();
         $.getJSON('/refresh', null, function(obj){
-            $('#repo-date').html(obj.human)
-            $('#repo-time').html(obj.machine)
-            $('.loader').hide();
-            $('.details').show();
+            if (obj.error) {
+                $('.showerror p').empty();
+                $('.showerror p').append(obj.error)
+                $('.loader').hide();
+                $('.showerror').show();
+            } else {
+                $('#repo-date').html(obj.human)
+                $('#repo-time').html(obj.machine)
+                $('.loader').hide();
+                $('.details').show();
+            }
         })
     });
     $('#inspect').on('click', function(event){
@@ -52,9 +60,15 @@ function setListeners() {
                     anchor.on('click', function(event){
                         $('.buglist').hide();
                         $.getJSON('/admin/bugs?id=' + bugs[i][1], function(buginfo){
-                            $('#bugtitle').empty().append(buginfo.date + " :: D" + buginfo.id)
-                            $('#bugtext').empty().append(buginfo.txt);
-                            $('.showbug').show();
+                            if (buginfo.error) {
+                                $('.showerror p').empty();
+                                $('.showerror p').append(buginfo.error)
+                                $('.showerror').show();
+                            } else {
+                                $('#bugtitle').empty().append(buginfo.date + " :: D" + buginfo.id)
+                                $('#bugtext').empty().append(buginfo.txt);
+                                $('.showbug').show();
+                            }
                         })
                     })
                 });

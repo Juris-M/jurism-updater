@@ -3,3 +3,6 @@ node_modules
 old-cgi
 translators
 bug
+REPO_HASH.txt
+config.json
+attic

@@ -1,9 +1,13 @@
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
-var debug = require('debug')('jurism-updater:server');
+var debug = require('debug')('jurism-updater:server@report');
 
-var utils = require('../tools/utils.js');
+var path = require('path');
+var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
+
+var utils = require(pth.fp.utils);
+var conn = require(pth.fp.connection);
 
 router.post('/', bodyParser.text({type: '*/*'}), function(req, res, next) {
     res.format({
@@ -15,12 +19,15 @@ router.post('/', bodyParser.text({type: '*/*'}), function(req, res, next) {
 
             var sql = "INSERT INTO bugs VALUES(?, ?, ?)";
             var params = [id, date, req.body];
-            utils.connection.query(sql, params, function(error, results, fields){
-                utils.sqlFail(error);
-                var myxml = '<?xml version="1.0" encoding="utf-8"?>\n';
-                myxml += '<reported reportID="' + id + '"/>\n';
-                res.send(myxml);
-            });
+            conn.then((conn) => conn.query(sql, params))
+                .then(() => {
+                    var myxml = '<?xml version="1.0" encoding="utf-8"?>\n';
+                    myxml += '<reported reportID="' + id + '"/>\n';
+                    res.send(myxml)
+                })
+                .catch(
+                    utils.handleError
+                );
         }
     });
 });

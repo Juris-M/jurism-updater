@@ -5,6 +5,12 @@ body {
 
 .showbug {
     text-align: left;
+    display: none;
+}
+
+.showerror {
+    color: red;
+    font-weight: bold;
 }
 
 .buglist {

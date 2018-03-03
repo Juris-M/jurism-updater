@@ -1,9 +1,13 @@
 var express = require('express');
 var router = express.Router();
+var debug = require('debug')('jurism-updater:server@admin');
 
-var debug = require('debug')('jurism-updater:server');
-var utils = require('../tools/utils.js');
-var gitops = require('../tools/gitops.js');
+var path = require('path');
+var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
+
+var utils = require(pth.fp.utils);
+var gitops = require(pth.fp.gitops);
+var conn = require(pth.fp.connection);
 
 /* GET admin page. */
 router.get('/', function(req, res, next) {
@@ -13,67 +17,85 @@ router.get('/', function(req, res, next) {
 function dropTable (res) {
     debug("dropTable()");
     var sql = "DROP TABLE translators;"
-    utils.connection.query(sql, function(error, results, fields){
-        utils.sqlFail(error);
-        createTable(res);
-    })
+    return conn.then((conn) => conn.query(sql))
 }
 
 function createTable(res) {
     debug("createTable()");
-    var sql = utils.sqlTranslatorCreateStatement();
-    utils.connection.query(sql, function(error, results, fields){
-        utils.sqlFail(error);
-        populateTable(res);
-    })
+    var sql = utils.sqlTranslatorCreateStatement;
+    return conn.then((conn) => conn.query(sql))
 }
 
 function recreateTable(res) {
     debug("recreateTable()");
     var sql = "SELECT * FROM information_schema.tables WHERE table_schema = 'jurism' AND table_name = 'translators' LIMIT 1;"
-    utils.connection.query(sql, function (error, results, fields){
-        utils.sqlFail(error);
-        if (results[0]) {
-            dropTable(res);
-        } else {
-            createTable(res);
-        }
-    })
+    return conn.then((conn) => conn.query(sql))
+        .then((results) => {
+            if (results[0].length) {
+                return dropTable(res)
+                    .then(() => createTable(res))
+                    .then(() => populateTable(res))
+            } else {
+                return createTable(res)
+                    .then(() => populateTable(res))
+            }
+        });
 }
 
 function populateTable(res) {
     debug("populateTable()");
-    gitops.iterateTranslators(res, null, utils.addFile, gitops.reportRepoTime);
+    return gitops.iterateTranslators(res, null, utils.addFile)
 }
 
 /* GET regenerate database op. */
 router.get('/generate', function(req, res, next) {
+    this.res = res;
+    var me = this;
     res.format({
         'text/plain': function() {
             utils.removeRepoHash();
-            recreateTable(res);
+            return recreateTable(res)
+                .then(() => gitops.reportRepoTime(res))
+                .then((repoDate) => res.send(JSON.stringify(repoDate)))
+                .catch(
+                    utils.handleError.bind(me)
+                )
         }
     });
 });
 
 /* GET report repo date and time op. */
 router.get('/inspect', function(req, res, next) {
+    this.res = res;
+    var me = this;
     res.format({
         'text/plain': function(){
-            gitops.reportRepoTime(res);
+            return gitops.reportRepoTime(res)
+                .then((repoDate) => res.send(JSON.stringify(repoDate)))
+                .catch(
+                    utils.handleError.bind(me)
+                )
         }
     })
 });
 
 /* GET report repo date and time op. */
 router.get('/bugs', function(req, res, next) {
+    this.res = res;
+    var me = this;
     res.format({
         'text/plain': function(){
             if (req.query.id) {
                 console.log("do getBug with "+req.query.id);
-                utils.getBug(res, req.query.id);
+                return utils.getBug(res, req.query.id)
+                    .catch(
+                        utils.handleError.bind(me)
+                    )
             } else {
-                utils.bugList(res);
+                return utils.bugList(res)
+                    .catch(
+                        utils.handleError.bind(me)
+                    );
             }
         }
     })

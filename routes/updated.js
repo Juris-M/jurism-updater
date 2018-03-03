@@ -1,12 +1,13 @@
 var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
+var debug = require('debug')('jurism-updater:server@updated');
 
-var debug = require('debug')('jurism-updater:server');
-var mysql = require('mysql')
-var utils = require('../tools/utils.js');
+var path = require('path');
+var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 
-var connection = utils.connection;
+var utils = require(pth.fp.utils);
+var conn = require(pth.fp.connection);
 
 /* From Zotero -- POST body structure to request style updates */
 /*
@@ -32,18 +33,25 @@ router.post('/', bodyParser.urlencoded({ type: '*/*', extended: true }), functio
         'application/xml': function() {
             if (undefined === req.query.last) {
                 var sql = "SELECT * FROM translators;"
-                connection.query(sql, [dateSecs], function(error, results, fields){
-                    utils.sqlFail(error);
-                    res.send(utils.makeXml(results));
-                })
+                conn.query(sql, [dateSecs])
+                    .then(function(results){
+                        res.send(utils.makeXml(results));
+                    })
+                    .catch(
+                        handleError
+                    );
             } else {
                 var dateSecs = parseInt(req.query.last, 10);
                 var sql = "SELECT * FROM translators WHERE lastUpdated>?;"
-                connection.query(sql, [dateSecs], function(error, results, fields){
-                    utils.sqlFail(error);
-                    res.send(utils.makeXml(results));
-                })
-            } 
+                conn.query(sql, [dateSecs])
+                    .then(function(results){
+                        utils.sqlFail(error);
+                        res.send(utils.makeXml(results));
+                    })
+                    .catch(
+                        handleError
+                    );
+            }
         }
     });
 });
