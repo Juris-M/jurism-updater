@@ -3,6 +3,8 @@ node_modules
 old-cgi
 translators
 bug
-REPO_HASH.txt
+COMMIT_TRANSLATORS.txt
 config.json
 attic
+csl-styles
+jm-styles

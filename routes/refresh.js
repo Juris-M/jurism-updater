@@ -6,6 +6,7 @@ var path = require('path');
 var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 
 var utils = require(pth.fp.utils);
+var repo_kit = require(pth.fp.repo_kit);
 var trans_kit = require(pth.fp.trans_kit);
 
 router.get('/', function(req, res, next) {
@@ -13,19 +14,14 @@ router.get('/', function(req, res, next) {
     var me = this;
     res.format({
         'text/plain': function() {
-            // Proceed only if REPO_HASH.txt exists
-            if (trans_kit.hasRepoHash()) {
-                return trans_kit.refreshTranslators(res)
-                    .then(() => trans_kit.reportRepoTime(res))
-                    .then((repoDate) => res.send(JSON.stringify(repoDate)))
-                    .catch(
-                        utils.handleError.bind(me)
-                    )
-            } else {
-                res.send({
-                    error: "REPO_HASH does not exist. Regenerate DB."
-                })
-            }
+            return repo_kit.refreshRepo("jm-styles")
+                .then(() => repo_kit.refreshRepo("csl-styles"))
+                .then(() => repo_kit.refreshRepo("translators"))
+                .then(() => trans_kit.reportRepoTime())
+                .then((repoDate) => res.send(JSON.stringify(repoDate)))
+                .catch(
+                    utils.handleError.bind(me)
+                );
         }
     });
 });

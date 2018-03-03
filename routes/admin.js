@@ -21,9 +21,8 @@ router.get('/generate', function(req, res, next) {
     var me = this;
     res.format({
         'text/plain': function() {
-            trans_kit.removeRepoHash();
-            return trans_kit.recreateTable(res)
-                .then(() => trans_kit.reportRepoTime(res))
+            return trans_kit.recreateTable()
+                .then(() => trans_kit.reportRepoTime())
                 .then((repoDate) => res.send(JSON.stringify(repoDate)))
                 .catch(
                     utils.handleError.bind(me)
@@ -38,7 +37,7 @@ router.get('/inspect', function(req, res, next) {
     var me = this;
     res.format({
         'text/plain': function(){
-            return trans_kit.reportRepoTime(res)
+            return trans_kit.reportRepoTime()
                 .then((repoDate) => res.send(JSON.stringify(repoDate)))
                 .catch(
                     utils.handleError.bind(me)
@@ -54,12 +53,14 @@ router.get('/bugs', function(req, res, next) {
     res.format({
         'text/plain': function(){
             if (req.query.id) {
-                return bug_kit.getBug(res, req.query.id)
+                return bug_kit.getBug(req.query.id)
+                    .then((ret) => res.send(ret))
                     .catch(
                         utils.handleError.bind(me)
                     )
             } else {
-                return bug_kit.bugList(res)
+                return bug_kit.bugList()
+                    .then((ret) => res.send(ret))
                     .catch(
                         utils.handleError.bind(me)
                     );
