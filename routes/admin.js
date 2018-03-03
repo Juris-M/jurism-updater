@@ -12,7 +12,7 @@ var conn = require(pth.fp.connection);
 
 /* GET admin page. */
 router.get('/', function(req, res, next) {
-  res.render('admin', { title: 'Juris-M Translator Database Administration' });
+    res.render('admin', { title: 'Juris-M Translator Database Administration', subFolder: "" });
 });
 
 /* GET regenerate database op. */

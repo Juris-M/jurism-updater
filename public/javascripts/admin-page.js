@@ -1,4 +1,7 @@
 function setListeners() {
+
+    var subFolder = "";
+    
     function hideAll(){
         $('.details').hide();
         $('.loader').hide();
@@ -9,7 +12,7 @@ function setListeners() {
     $('#generate').on('click', function(event){
         hideAll();
         $('.loader').show();
-        $.getJSON('/updater/admin/generate', null, function(obj){
+        $.getJSON(subFolder + '/admin/generate', null, function(obj){
             $('#repo-date').html(obj.human)
             $('#repo-time').html(obj.machine)
             $('.loader').hide();
@@ -19,7 +22,7 @@ function setListeners() {
     $('#refresh').on('click', function(event){
         hideAll();
         $('.loader').show();
-        $.getJSON('/updater/refresh', null, function(obj){
+        $.getJSON(subFolder + '/refresh', null, function(obj){
             if (obj.error) {
                 $('.showerror p').empty();
                 $('.showerror p').append(obj.error)
@@ -35,7 +38,7 @@ function setListeners() {
     });
     $('#inspect').on('click', function(event){
         hideAll();
-        $.getJSON('/updater/admin/inspect', null, function(obj){
+        $.getJSON(subFolder + '/admin/inspect', null, function(obj){
             $('#repo-date').html(obj.human)
             $('#repo-time').html(obj.machine)
             $('.details').show();
@@ -43,7 +46,7 @@ function setListeners() {
     });
     $('#bugs').on('click', function(event){
         hideAll();
-        $.getJSON('/updater/admin/bugs', null, function(bugs){
+        $.getJSON(subFolder + '/admin/bugs', null, function(bugs){
             // Set a list of bug links in a target div
             // /admin/bugs should build DB if it does not exist
             // /admin/bugs should purge entries over two weeks old
@@ -59,7 +62,7 @@ function setListeners() {
                     anchor.append(bugs[i][0] + " :: D" + bugs[i][1]);
                     anchor.on('click', function(event){
                         $('.buglist').hide();
-                        $.getJSON('/updater/admin/bugs?id=' + bugs[i][1], function(buginfo){
+                        $.getJSON(subFolder + '/admin/bugs?id=' + bugs[i][1], function(buginfo){
                             if (buginfo.error) {
                                 $('.showerror p').empty();
                                 $('.showerror p').append(buginfo.error)
