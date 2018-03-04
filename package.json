@@ -8,6 +8,7 @@
   "dependencies": {
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
+    "child-process-promise": "^2.2.1",
     "cookie-parser": "~1.4.3",
     "crlf-normalize": "^1.0.0",
     "debug": "~2.6.9",

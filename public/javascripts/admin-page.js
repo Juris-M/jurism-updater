@@ -11,10 +11,17 @@ function setListeners() {
         hideAll();
         $('.loader').show();
         $.getJSON('/updater/admin/generate', null, function(obj){
-            $('#repo-date').html(obj.human)
-            $('#repo-time').html(obj.machine)
-            $('.loader').hide();
-            $('.details').show();
+            if (obj.error) {
+                $('.showerror p').empty();
+                $('.showerror p').append(obj.error)
+                $('.loader').hide();
+                $('.showerror').show();
+            } else {
+                $('#repo-date').html(obj.human)
+                $('#repo-time').html(obj.machine)
+                $('.loader').hide();
+                $('.details').show();
+            }
         })
     });
     $('#refresh').on('click', function(event){
@@ -37,9 +44,18 @@ function setListeners() {
     $('#inspect').on('click', function(event){
         hideAll();
         $.getJSON('/updater/admin/inspect', null, function(obj){
-            $('#repo-date').html(obj.human)
-            $('#repo-time').html(obj.machine)
-            $('.details').show();
+            if (obj.error) {
+                console.log(obj.error)
+                $('.showerror p').empty();
+                $('.showerror p').append(obj.error)
+                $('.loader').hide();
+                $('.showerror').show();
+            } else {
+                $('#repo-date').html(obj.human)
+                $('#repo-time').html(obj.machine)
+                $('.loader').hide();
+                $('.details').show();
+            }
         })
     });
     $('#bugs').on('click', function(event){
