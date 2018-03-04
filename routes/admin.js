@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var debug = require('debug')('jurism-updater:server@admin');
+var fs = require('fs');
 
 var path = require('path');
 var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
@@ -10,8 +11,18 @@ var trans_kit = require(pth.fp.trans_kit)
 var utils = require(pth.fp.utils);
 var conn = require(pth.fp.connection);
 
+var basicAuth = require('express-basic-auth')
+var config = JSON.parse(fs.readFileSync(pth.fp.config));
+var useBasicAuth = basicAuth({
+    users: {
+        admin: config.admin_password
+    },
+    challenge: true,
+    realm: "Iejah3co"
+})
+
 /* GET admin page. */
-router.get('/', function(req, res, next) {
+router.get('/', useBasicAuth, function(req, res, next) {
     res.render('admin', { title: 'Juris-M Translator Database Administration', subFolder: "" });
 });
 
