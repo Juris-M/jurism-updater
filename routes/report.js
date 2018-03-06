@@ -7,7 +7,7 @@ var path = require('path');
 var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 
 var utils = require(pth.fp.utils);
-var conn = require(pth.fp.connection);
+var query = require(pth.fp.connection);
 
 router.post('/', bodyParser.text({type: '*/*'}), function(req, res, next) {
     res.format({
@@ -18,7 +18,7 @@ router.post('/', bodyParser.text({type: '*/*'}), function(req, res, next) {
 
             var sql = "INSERT INTO bugs VALUES(?, ?, ?)";
             var params = [id, date, req.body];
-            conn.then((conn) => conn.query(sql, params))
+            query(sql, params)
                 .then(() => {
                     var myxml = '<?xml version="1.0" encoding="utf-8"?>\n';
                     myxml += '<reported reportID="' + id + '"/>\n';

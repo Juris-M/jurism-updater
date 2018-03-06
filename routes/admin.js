@@ -9,7 +9,6 @@ var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 var bug_kit = require(pth.fp.bug_kit)
 var trans_kit = require(pth.fp.trans_kit)
 var utils = require(pth.fp.utils);
-var conn = require(pth.fp.connection);
 
 var basicAuth = require('express-basic-auth')
 var config = JSON.parse(fs.readFileSync(pth.fp.config));

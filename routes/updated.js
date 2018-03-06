@@ -7,7 +7,7 @@ var path = require('path');
 var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 
 var utils = require(pth.fp.utils);
-var conn = require(pth.fp.connection);
+var query = require(pth.fp.connection);
 var trans_kit = require(pth.fp.trans_kit);
 
 /* From Zotero -- POST body structure to request style updates */
@@ -36,7 +36,7 @@ router.post('/', bodyParser.urlencoded({ type: '*/*', extended: true }), functio
         'application/xml': function() {
             if (undefined === req.query.last) {
                 var sql = "SELECT * FROM translators;"
-                return conn.then((conn) => conn.query(sql, [dateSecs]))
+                return query(sql, [dateSecs])
                     .then((results) => res.send(trans_kit.makeXml(results[0])))
                     .catch(
                         utils.handleError.bind(me)
@@ -44,7 +44,7 @@ router.post('/', bodyParser.urlencoded({ type: '*/*', extended: true }), functio
             } else {
                 var dateSecs = parseInt(req.query.last, 10);
                 var sql = "SELECT * FROM translators WHERE lastUpdated>?;"
-                return conn.then((conn) => conn.query(sql, [dateSecs]))
+                return query(sql, [dateSecs])
                     .then((results) => res.send(trans_kit.makeXml(results[0])))
                     .catch(
                         utils.handleError.bind(me)
