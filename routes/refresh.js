@@ -17,7 +17,7 @@ router.get('/', function(req, res, next) {
             return repo_kit.refreshRepo("jm-styles")
                 .then(() => repo_kit.refreshRepo("csl-styles"))
                 .then(() => repo_kit.refreshRepo("translators"))
-                .then(() => trans_kit.reportRepoTime())
+                .then(() => repo_kit.reportRepoTime())
                 .then((repoDate) => res.send(JSON.stringify(repoDate)))
                 .catch(
                     utils.handleError.bind(me)

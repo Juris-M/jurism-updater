@@ -7,7 +7,7 @@ var path = require('path');
 var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 
 var bug_kit = require(pth.fp.bug_kit)
-var trans_kit = require(pth.fp.trans_kit)
+var repo_kit = require(pth.fp.repo_kit)
 var utils = require(pth.fp.utils);
 
 var basicAuth = require('express-basic-auth')
@@ -31,8 +31,8 @@ router.get('/generate', function(req, res, next) {
     var me = this;
     res.format({
         'text/plain': function() {
-            return trans_kit.recreateTable()
-                .then(() => trans_kit.reportRepoTime())
+            return repo_kit.recreateTable("translators")
+                .then(() => repo_kit.reportRepoTime())
                 .then((repoDate) => res.send(JSON.stringify(repoDate)))
                 .catch(
                     utils.handleError.bind(me)
@@ -47,7 +47,7 @@ router.get('/inspect', function(req, res, next) {
     var me = this;
     res.format({
         'text/plain': function(){
-            return trans_kit.reportRepoTime()
+            return repo_kit.reportRepoTime()
                 .then((repoDate) => res.send(JSON.stringify(repoDate)))
                 .catch(
                     utils.handleError.bind(me)
