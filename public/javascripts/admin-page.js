@@ -1,5 +1,7 @@
 function setListeners() {
 
+    var timeout;
+    
     function hideAll(){
         $('.details').hide();
         $('.loader').hide();
@@ -7,28 +9,39 @@ function setListeners() {
         $('.showbug').hide();
         $('.showerror').hide();
     }
-    $('#generate').on('click', function(event){
-        hideAll();
-        $('.loader').show();
-        $.ajax({
-            url: '/updater/admin/generates',
-            dataType: 'json',
-            data: null,
-            timeout: 300000, //300 second timeout
-            success: function(obj) {
-                if (obj.error) {
-                    $('.showerror p').empty();
-                    $('.showerror p').append(obj.error)
-                    $('.loader').hide();
-                    $('.showerror').show();
-                } else {
+    function pollServer(goal) {
+        return setTimeout(function(){
+            $.getJSON('/updater/admin/pollserver?goal=' + goal, null, function(obj){
+                if (obj.done) {
                     $('#repo-date').html(obj.human)
                     $('#repo-time').html(obj.machine)
                     $('.loader').hide();
                     $('.details').show();
+                } else {
+                    timeout = pollServer(goal);
                 }
+            })
+        }, 5000)
+    }
+    
+    $('#generate').on('click', function(event){
+        hideAll();
+        $('.loader').show();
+        $.getJSON('/updater/admin/generate', null, function(obj){
+            if (obj.error) {
+                $('.showerror p').empty();
+                $('.showerror p').append(obj.error)
+                $('.loader').hide();
+                $('.showerror').show();
+            } else if (obj.goal) {
+                timeout = pollServer(obj.goal);
+            } else {
+                $('.showerror p').empty();
+                $('.showerror p').append("Something went wrong with DB generate")
+                $('.loader').hide();
+                $('.showerror').show();
             }
-        });
+        })
     });
     $('#refresh').on('click', function(event){
         hideAll();
