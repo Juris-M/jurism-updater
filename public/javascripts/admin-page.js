@@ -10,19 +10,25 @@ function setListeners() {
     $('#generate').on('click', function(event){
         hideAll();
         $('.loader').show();
-        $.getJSON('/updater/admin/generate', null, function(obj){
-            if (obj.error) {
-                $('.showerror p').empty();
-                $('.showerror p').append(obj.error)
-                $('.loader').hide();
-                $('.showerror').show();
-            } else {
-                $('#repo-date').html(obj.human)
-                $('#repo-time').html(obj.machine)
-                $('.loader').hide();
-                $('.details').show();
+        $.ajax({
+            url: '/updater/admin/generates',
+            dataType: 'json',
+            data: null,
+            timeout: 300000, //300 second timeout
+            success: function(obj) {
+                if (obj.error) {
+                    $('.showerror p').empty();
+                    $('.showerror p').append(obj.error)
+                    $('.loader').hide();
+                    $('.showerror').show();
+                } else {
+                    $('#repo-date').html(obj.human)
+                    $('#repo-time').html(obj.machine)
+                    $('.loader').hide();
+                    $('.details').show();
+                }
             }
-        })
+        });
     });
     $('#refresh').on('click', function(event){
         hideAll();
