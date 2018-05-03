@@ -13,6 +13,7 @@ var refresh = require('./routes/refresh');
 var report = require('./routes/report');
 var updated = require('./routes/updated');
 var keyreturn = require('./routes/keyreturn');
+var code = require('./routes/code');
 
 var app = express();
 
@@ -46,6 +47,7 @@ app.use('/updater/report', report);
 app.use('/updater/refresh', refresh);
 app.use('/updater/updated', updated);
 app.use('/updater/keyreturn', keyreturn);
+app.use('/updater/code', code);
 app.use('/updater', index);
 
 // catch 404 and forward to error handler
