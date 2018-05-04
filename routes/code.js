@@ -8,29 +8,10 @@ var utils = require(pth.fp.utils);
 var query = require(pth.fp.connection);
 var trans_kit = require(pth.fp.trans_kit);
 
-var flat_keys = [
-    "translatorID",
-    "translatorType",
-    "label",
-    "creator",
-    "target",
-    "priority",
-    "lastUpdated",
-    "minVersion",
-    "maxVersion",
-    "inRepository",
-    "browserSupport",
-]
-
-var json_keys = [
-    "displayOptions",
-    "configOptions"
-]
-
 /* GET a translator. */
 router.get('/*', function(req, res, next) {
+    this.res = res;
     var me = this;
-    var myres = res;
     res.format({
         'text/plain': function(){
             var translatorID = req.url
@@ -41,19 +22,10 @@ router.get('/*', function(req, res, next) {
                 .then((results) => {
                     var obj = {};
                     var result = results[0][0];
-                    for (var key of flat_keys) {
-                        if (result[key]) {
-                            obj[key] = result[key];
-                        }
-                    }
-                    for (var key of json_keys) {
-                        if (result[key]) {
-                            obj[key] = JSON.parse(result[key]);
-                        }
-                    }
+                    var metadata = utils.composeMetadataBlock(result, true);
                     var code = results[0][0].code.toString().trim();
-                    var ret = JSON.stringify(obj, null, 2) + "\n\n" + code;
-                    myres.send(ret);
+                    var ret = metadata + "\n\n" + code;
+                    me.res.send(ret);
                 })
                 .catch(
                     utils.handleError.bind(me)
