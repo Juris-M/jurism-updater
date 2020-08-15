@@ -7,7 +7,7 @@ var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 var debug = require('debug')('jurism-updater:server@metadata');
 
 var utils = require(pth.fp.utils);
-var query = require(pth.fp.connection);
+var query = require(pth.fp.connection).query;
 var trans_kit = require(pth.fp.trans_kit);
 
 var flat_keys = [

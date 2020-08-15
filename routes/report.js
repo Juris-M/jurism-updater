@@ -7,7 +7,7 @@ var path = require('path');
 var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 
 var utils = require(pth.fp.utils);
-var query = require(pth.fp.connection);
+var query = require(pth.fp.connection).query;
 
 router.post('/', bodyParser.text({type: '*/*'}), function(req, res, next) {
     res.format({

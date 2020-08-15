@@ -5,7 +5,7 @@ var path = require('path');
 var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 
 var utils = require(pth.fp.utils);
-var query = require(pth.fp.connection);
+var query = require(pth.fp.connection).query;
 var trans_kit = require(pth.fp.trans_kit);
 
 /* GET a translator. */
