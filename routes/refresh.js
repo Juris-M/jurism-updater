@@ -13,15 +13,16 @@ router.get('/', function(req, res, next) {
     this.res = res;
     var me = this;
     res.format({
-        'text/plain': function() {
-            return repo_kit.refreshRepo("jm-styles")
-                .then(() => repo_kit.refreshRepo("csl-styles"))
-                .then(() => repo_kit.refreshRepo("translators"))
-                .then(() => repo_kit.reportRepoTime())
-                .then((repoDate) => res.send(JSON.stringify(repoDate)))
-                .catch(
-                    utils.handleError.bind(me)
-                );
+        'text/plain': async function() {
+            try {
+                await repo_kit.refreshRepo("jm-styles");
+                await repo_kit.refreshRepo("csl-styles");
+                await repo_kit.refreshRepo("translators");
+                var repoDate = await repo_kit.reportRepoTime();
+                res.send(JSON.stringify(repoDate));
+            } catch (e) {
+                utils.handleError.call(me, e);
+            }
         }
     });
 });

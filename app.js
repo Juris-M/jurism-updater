@@ -40,6 +40,7 @@ app.use('/updater/styles', express.static(path.join(__dirname, 'jm-styles'), {
         }
     }
 }));
+
 app.use('/updater', express.static(path.join(__dirname, 'public')));
 
 

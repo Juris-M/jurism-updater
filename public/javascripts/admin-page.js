@@ -9,39 +9,45 @@ function setListeners() {
         $('.showbug').hide();
         $('.showerror').hide();
     }
-    function pollServer(goal) {
+    function pollServer(obj) {
         return setTimeout(function(){
-            $.getJSON('/updater/admin/pollserver?goal=' + goal, null, function(obj){
+            $.getJSON(`/updater/admin/pollserver?goal=${obj.goal}&targets=${obj.targets}&count=${obj.count}`, null, function(obj){
                 if (obj.done) {
-                    $('#repo-date').html(obj.human)
-                    $('#repo-time').html(obj.machine)
+                    $('#repo-date').html(obj.human);
+                    $('#repo-time').html(obj.machine);
                     $('.loader').hide();
                     $('.details').show();
                 } else {
-                    timeout = pollServer(goal);
+                    timeout = pollServer(obj);
                 }
-            })
-        }, 5000)
-    }
+            });
+        }, 5000);
+    };
     
     $('#generate').on('click', function(event){
+        var targets = $('input[type=checkbox]:checked').map(function(_, el) {
+            return $(el).val();
+        }).get();
+        targets = targets.join(",");
+        if (!targets) return;
+
         hideAll();
         $('.loader').show();
-        $.getJSON('/updater/admin/generate', null, function(obj){
+        $.getJSON(`/updater/admin/generate?targets=${targets}`, null, function(obj){
             if (obj.error) {
                 $('.showerror p').empty();
-                $('.showerror p').append(obj.error)
+                $('.showerror p').append(obj.error);
                 $('.loader').hide();
                 $('.showerror').show();
             } else if (obj.goal) {
-                timeout = pollServer(obj.goal);
+                timeout = pollServer(obj);
             } else {
                 $('.showerror p').empty();
-                $('.showerror p').append("Something went wrong with DB generate")
+                $('.showerror p').append("Something went wrong with DB generate");
                 $('.loader').hide();
                 $('.showerror').show();
             }
-        })
+        });
     });
     $('#refresh').on('click', function(event){
         hideAll();
@@ -49,33 +55,33 @@ function setListeners() {
         $.getJSON('/updater/refresh', null, function(obj){
             if (obj.error) {
                 $('.showerror p').empty();
-                $('.showerror p').append(obj.error)
+                $('.showerror p').append(obj.error);
                 $('.loader').hide();
                 $('.showerror').show();
             } else {
-                $('#repo-date').html(obj.human)
-                $('#repo-time').html(obj.machine)
+                $('#repo-date').html(obj.human);
+                $('#repo-time').html(obj.machine);
                 $('.loader').hide();
                 $('.details').show();
             }
-        })
+        });
     });
     $('#inspect').on('click', function(event){
         hideAll();
         $.getJSON('/updater/admin/inspect', null, function(obj){
             if (obj.error) {
-                console.log(obj.error)
+                console.log(obj.error);
                 $('.showerror p').empty();
-                $('.showerror p').append(obj.error)
+                $('.showerror p').append(obj.error);
                 $('.loader').hide();
                 $('.showerror').show();
             } else {
-                $('#repo-date').html(obj.human)
-                $('#repo-time').html(obj.machine)
+                $('#repo-date').html(obj.human);
+                $('#repo-time').html(obj.machine);
                 $('.loader').hide();
                 $('.details').show();
             }
-        })
+        });
     });
     $('#bugs').on('click', function(event){
         hideAll();
@@ -105,8 +111,8 @@ function setListeners() {
                                 $('#bugtext').empty().append(buginfo.txt);
                                 $('.showbug').show();
                             }
-                        })
-                    })
+                        });
+                    });
                 });
             } else {
                 var li = $('<li/>')
@@ -114,6 +120,6 @@ function setListeners() {
                 li.append("No bug reports available");
             }
             $('.buglist').show();
-        })
+        });
     });
 }

@@ -36,22 +36,21 @@ router.get('/', function(req, res, next) {
     this.res = res;
     var me = this;
     res.format({
-        'application/json': function(){
+        'application/json': async function(){
             var last = req.query.last ? req.query.last : 0;
             last = parseInt(last, 10);
             var sql = "SELECT  " + keys + " FROM translators where lastUpdated > ?";
-            query(sql, [last])
-                .then((results) => {
-                    var ret = [];
-                    for (var result of results[0]) {
-                        ret.push(utils.composeMetadataBlock(result));
-                    }
-                    me.res.send(ret);
-                })
-                .catch(
-                    utils.handleError.bind(me)
-                );
+            try {
+                var results = await query(sql, [last]);
+                var ret = [];
+                for (var result of results[0]) {
+                    ret.push(utils.composeMetadataBlock(result));
+                }
+                me.res.send(ret);
+            } catch (e) {
+                utils.handleError.call(me, e);
+            }
         }
-    })
+    });
 });
 module.exports = router;

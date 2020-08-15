@@ -28,27 +28,33 @@ for (let id in styles) {
 var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 */
 
-/* POST fetch files after a given date */
+/* POST fetch files (translators AND styles) after a given date */
 router.post('/', bodyParser.urlencoded({ type: '*/*', extended: true }), function(req, res, next) {
     this.res = res;
     var me = this;
     res.format({
-        'application/xml': function() {
+        'application/xml': async function() {
             if (undefined === req.query.last) {
-                var sql = "SELECT * FROM translators;"
-                return query(sql, [dateSecs])
-                    .then((results) => res.send(trans_kit.makeXml(results[0])))
-                    .catch(
-                        utils.handleError.bind(me)
-                    );
+                
+                // Oooooh. We need to return a single XML object with data for BOTH
+                // styles AND translators.
+                
+                var sql = "SELECT * FROM translators;";
+                try {
+                    var results = await query(sql, [dateSecs]);
+                    res.send(trans_kit.makeXml(results[0]));
+                } catch (e) {
+                    utils.handleError.call(me, e);
+                }
             } else {
                 var dateSecs = parseInt(req.query.last, 10);
-                var sql = "SELECT * FROM translators WHERE lastUpdated>?;"
-                return query(sql, [dateSecs])
-                    .then((results) => res.send(trans_kit.makeXml(results[0])))
-                    .catch(
-                        utils.handleError.bind(me)
-                    )
+                var sql = "SELECT * FROM translators WHERE lastUpdated>?;";
+                try {
+                    var results = await query(sql, [dateSecs]);
+                    res.send(trans_kit.makeXml(results[0]));
+                } catch (e) {
+                    utils.handleError.call(me, e);
+                }
             }
         }
     });
