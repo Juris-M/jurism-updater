@@ -46,9 +46,9 @@ router.get('/', function(req, res, next) {
                 for (var result of results[0]) {
                     ret.push(utils.composeMetadataBlock(result));
                 }
-                me.res.send(ret);
+                return me.res.send(ret);
             } catch (e) {
-                utils.handleError.call(me, e);
+                return utils.handleError.call(me, e);
             }
         }
     });

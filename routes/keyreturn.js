@@ -5,7 +5,7 @@ var router = express.Router();
 router.get('/', function(req, res, next) {
   res.format({
     'text/plain': function(){
-      res.send(JSON.stringify(Object.keys(req), null, 2)+"\n"+JSON.stringify(req.query, null, 2));
+      return res.send(JSON.stringify(Object.keys(req), null, 2)+"\n"+JSON.stringify(req.query, null, 2));
     }
   })
 });

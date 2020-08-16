@@ -25,9 +25,9 @@ router.get('/*', function(req, res, next) {
                 var metadata = utils.composeMetadataBlock(result, true);
                 var code = results[0][0].code.toString().trim();
                 var ret = metadata + "\n\n" + code;
-                me.res.send(ret);
+                return me.res.send(ret);
             } catch(e) {
-                utils.handleError.call(me, e);
+                return utils.handleError.call(me, e);
             };
         }
     });

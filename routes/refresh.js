@@ -19,9 +19,9 @@ router.get('/', function(req, res, next) {
                 await repo_kit.refreshRepo("csl-styles");
                 await repo_kit.refreshRepo("translators");
                 var repoDate = await repo_kit.reportRepoTime();
-                res.send(JSON.stringify(repoDate));
+                return res.send(JSON.stringify(repoDate));
             } catch (e) {
-                utils.handleError.call(me, e);
+                return utils.handleError.call(me, e);
             }
         }
     });
