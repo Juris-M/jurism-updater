@@ -24,7 +24,7 @@ router.post('/', bodyParser.text({type: '*/*'}), function(req, res, next) {
                 myxml += '<reported reportID="' + id + '"/>\n';
                 return res.send(myxml);
             } catch (e) {
-                return utils.handleError(e);
+                return utils.handleError(res, e);
             }
         }
     });

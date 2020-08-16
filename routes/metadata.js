@@ -33,8 +33,6 @@ var keys = flat_keys.join(",") + "," + json_keys.join(",");
 
 /* GET the lastUpdate of the latest translator. */
 router.get('/', function(req, res, next) {
-    this.res = res;
-    var me = this;
     res.format({
         'application/json': async function(){
             var last = req.query.last ? req.query.last : 0;
@@ -46,9 +44,9 @@ router.get('/', function(req, res, next) {
                 for (var result of results[0]) {
                     ret.push(utils.composeMetadataBlock(result));
                 }
-                return me.res.send(ret);
+                return res.send(ret);
             } catch (e) {
-                return utils.handleError.call(me, e);
+                return utils.handleError(res, e);
             }
         }
     });

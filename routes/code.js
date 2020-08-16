@@ -10,8 +10,6 @@ var trans_kit = require(pth.fp.trans_kit);
 
 /* GET a translator. */
 router.get('/*', function(req, res, next) {
-    this.res = res;
-    var me = this;
     res.format({
         'text/plain': async function(){
             var translatorID = req.url
@@ -25,9 +23,9 @@ router.get('/*', function(req, res, next) {
                 var metadata = utils.composeMetadataBlock(result, true);
                 var code = results[0][0].code.toString().trim();
                 var ret = metadata + "\n\n" + code;
-                return me.res.send(ret);
+                return res.send(ret);
             } catch(e) {
-                return utils.handleError.call(me, e);
+                return utils.handleError(res, e);
             };
         }
     });

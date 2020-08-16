@@ -50,15 +50,13 @@ router.get('/generate', function(req, res, next) {
                 var goalObj = await repo_kit.recreateTables(targets);
                 return res.send(JSON.stringify(goalObj));
             } catch (e) {
-                return utils.handleError.call(me, e);
+                return utils.handleError(res, e);
             }
         }
     });
 });
 
 router.get('/pollserver', function(req, res, next) {
-    this.res = res;
-    var me = this;
     res.format({
         'text/plain': function() {
             // This is used only for a complete database regenerate.
@@ -77,7 +75,7 @@ router.get('/pollserver', function(req, res, next) {
                         res.send(JSON.stringify(doneAndDate));
                     })
                     .catch((e) => {
-                        utils.handleError.call(me, e);
+                        utils.handleError(res, e);
                     });
         }
     });
@@ -93,7 +91,7 @@ router.get('/inspect', function(req, res, next) {
                 var repoDate = await repo_kit.reportRepoTime();
                 return res.send(JSON.stringify(repoDate));
             } catch (e) {
-                return utils.handleError.call(me, e);
+                return utils.handleError(res, e);
             }
         }
     });
@@ -115,7 +113,7 @@ router.get('/bugs', function(req, res, next) {
                     return res.send(ret);
                 }
             } catch (e) {
-                return utils.handleError.call(me, e);
+                return utils.handleError(res, e);
             }
         }
     });

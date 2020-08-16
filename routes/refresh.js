@@ -10,8 +10,6 @@ var repo_kit = require(pth.fp.repo_kit);
 var trans_kit = require(pth.fp.trans_kit);
 
 router.get('/', function(req, res, next) {
-    this.res = res;
-    var me = this;
     res.format({
         'text/plain': async function() {
             try {
@@ -19,9 +17,9 @@ router.get('/', function(req, res, next) {
                 await repo_kit.refreshRepo("csl-styles");
                 await repo_kit.refreshRepo("translators");
                 var repoDate = await repo_kit.reportRepoTime();
-                return res.send(JSON.stringify(repoDate));
+                res.send(JSON.stringify(repoDate));
             } catch (e) {
-                return utils.handleError.call(me, e);
+                utils.handleError(res, e);
             }
         }
     });

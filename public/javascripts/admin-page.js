@@ -13,14 +13,18 @@ function setListeners() {
         return setTimeout(function(){
             obj = JSON.parse(JSON.stringify(obj));
             $.getJSON(`/updater/admin/pollserver?goal=${obj.goal}&targets=${obj.targets}&count=${obj.count}`, null, function(obj){
-                if (obj.done) {
+                if (obj.error) {
+                    $('.showerror p').empty();
+                    $('.showerror p').append(obj.error);
+                    $('.loader').hide();
+                    $('.showerror').show();
+                } else if (obj.done) {
                     $('#repo-date').html(obj.human);
                     $('#repo-time').html(obj.machine);
                     $('.loader').hide();
                     $('.details').show();
-                    return true;
                 } else {
-                    return pollServer(obj);
+                    timeout = pollServer(obj);
                 }
             });
         }, 10000);
@@ -43,7 +47,7 @@ function setListeners() {
                 $('.showerror').show();
             } else if (obj.goal) {
                 console.log(`RUNNING POLLSERVER FROM THE TOP`);
-                pollServer(obj);
+                timeout = pollServer(obj);
             } else {
                 $('.showerror p').empty();
                 $('.showerror p').append("Something went wrong with DB generate");

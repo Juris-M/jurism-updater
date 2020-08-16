@@ -30,8 +30,6 @@ var body = 'styles=' + encodeURIComponent(JSON.stringify(styleTimestamps));
 
 /* POST fetch files (translators AND styles) after a given date */
 router.post('/', bodyParser.urlencoded({ type: '*/*', extended: true }), function(req, res, next) {
-    this.res = res;
-    var me = this;
     res.format({
         'application/xml': async function() {
             var results;
@@ -41,7 +39,7 @@ router.post('/', bodyParser.urlencoded({ type: '*/*', extended: true }), functio
                     results = await query(sql, [dateSecs]);
                     return res.send(trans_kit.makeXml(results[0]));
                 } catch (e) {
-                    return utils.handleError.call(me, e);
+                    utils.handleError(res, e);
                 }
             } else {
                 var dateSecs = parseInt(req.query.last, 10);
@@ -50,7 +48,7 @@ router.post('/', bodyParser.urlencoded({ type: '*/*', extended: true }), functio
                     var myxml = await trans_kit.makeXml(dateSecs, styles);
                     return res.send(myxml);
                 } catch (e) {
-                    return utils.handleError.call(me, e);
+                    utils.handleError(res, e);
                 }
             }
         }
