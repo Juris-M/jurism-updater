@@ -73,6 +73,7 @@ router.get('/pollserver', function(req, res, next) {
                     count: parseInt(req.query.count)
                 };
                 var doneAndDate = await repo_kit.checkTables(obj);
+                console.log(`checkTables: had ${JSON.stringify(obj)}, received ${JSON.stringify(doneAndDate)}`);
                 return res.send(JSON.stringify(doneAndDate));
             } catch (e) {
                 return utils.handleError.call(me, e);
