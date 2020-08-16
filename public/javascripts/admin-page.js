@@ -12,7 +12,7 @@ function setListeners() {
     function pollServer(obj) {
         return setTimeout(function(){
             obj = JSON.parse(JSON.stringify(obj));
-            $.getJSON(`/updater/admin/pollserver?goal=${obj.goal}&targets=${obj.targets}&count=${obj.count}`, null, function(obj){
+            $.getJSON(`/updater/admin/pollserver?goal=${obj.goal}&targets=${obj.targets}&count=${obj.count}&timenow=${Date.now()}`, null, function(obj){
                 if (obj.done) {
                     $('#repo-date').html(obj.human);
                     $('#repo-time').html(obj.machine);
