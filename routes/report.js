@@ -22,9 +22,9 @@ router.post('/', bodyParser.text({type: '*/*'}), function(req, res, next) {
                 await query(sql, params);
                 var myxml = '<?xml version="1.0" encoding="utf-8"?>\n';
                 myxml += '<reported reportID="' + id + '"/>\n';
-                res.send(myxml);
+                return res.send(myxml);
             } catch (e) {
-                utils.handleError(e);
+                return utils.handleError(e);
             }
         }
     });

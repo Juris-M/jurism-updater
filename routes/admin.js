@@ -40,6 +40,7 @@ router.get('/generate', function(req, res, next) {
     var me = this;
     res.format({
         'text/plain': async function() {
+            generateInProgress = true;
             // Kick off the build process
             // Starts the rebuild promise chain on the server,
             // and reports back the number of translators to be
@@ -47,9 +48,9 @@ router.get('/generate', function(req, res, next) {
             try {
                 var targets = req.query.targets.split(",");
                 var goalObj = await repo_kit.recreateTables(targets);
-                res.send(JSON.stringify(goalObj));
+                return res.send(JSON.stringify(goalObj));
             } catch (e) {
-                utils.handleError.call(me, e);
+                return utils.handleError.call(me, e);
             }
         }
     });
@@ -64,14 +65,18 @@ router.get('/pollserver', function(req, res, next) {
             // It needs some fixing, though, here or elsewhere, because there
             // are now THREE database tables to rebuild, not one. So what
             // is "goal" value?
-            var goal = req.query.goal;
-            var obj = {
-                goal: req.query.goal,
-                targets: req.query.targets.split(","),
-                count: parseInt(req.query.count)
-            };
-            var doneAndDate = await repo_kit.checkTables(obj);
-            res.send(JSON.stringify(doneAndDate));
+            try {
+                var goal = req.query.goal;
+                var obj = {
+                    goal: req.query.goal,
+                    targets: req.query.targets.split(","),
+                    count: parseInt(req.query.count)
+                };
+                var doneAndDate = await repo_kit.checkTables(obj);
+                return res.send(JSON.stringify(doneAndDate));
+            } catch (e) {
+                return utils.handleError.call(me, e);
+            }
         }
     });
 });
@@ -84,9 +89,9 @@ router.get('/inspect', function(req, res, next) {
         'text/plain': async function(){
             try {
                 var repoDate = await repo_kit.reportRepoTime();
-                res.send(JSON.stringify(repoDate));
+                return res.send(JSON.stringify(repoDate));
             } catch (e) {
-                utils.handleError.call(me, e);
+                return utils.handleError.call(me, e);
             }
         }
     });
@@ -102,13 +107,13 @@ router.get('/bugs', function(req, res, next) {
             try {
                 if (req.query.id) {
                     ret = await bug_kit.getBug(req.query.id);
-                    res.send(ret);
+                    return res.send(ret);
                 } else {
                     ret = await bug_kit.bugList();
-                    res.send(ret);
+                    return res.send(ret);
                 }
             } catch (e) {
-                utils.handleError.call(me, e);
+                return utils.handleError.call(me, e);
             }
         }
     });

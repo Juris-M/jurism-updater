@@ -21,7 +21,7 @@ function setListeners() {
                     timeout = pollServer(obj);
                 }
             });
-        }, 5000);
+        }, 10000);
     };
     
     $('#generate').on('click', function(event){

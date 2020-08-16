@@ -39,18 +39,18 @@ router.post('/', bodyParser.urlencoded({ type: '*/*', extended: true }), functio
                 var sql = "SELECT * FROM translators;";
                 try {
                     results = await query(sql, [dateSecs]);
-                    res.send(trans_kit.makeXml(results[0]));
+                    return res.send(trans_kit.makeXml(results[0]));
                 } catch (e) {
-                    utils.handleError.call(me, e);
+                    return utils.handleError.call(me, e);
                 }
             } else {
                 var dateSecs = parseInt(req.query.last, 10);
                 try {
                     var styles = JSON.parse(req.body.styles);
                     var myxml = await trans_kit.makeXml(dateSecs, styles);
-                    res.send(myxml);
+                    return res.send(myxml);
                 } catch (e) {
-                    utils.handleError.call(me, e);
+                    return utils.handleError.call(me, e);
                 }
             }
         }
