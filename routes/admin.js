@@ -76,7 +76,8 @@ router.get('/pollserver', function(req, res, next) {
                 console.log(`checkTables: had ${JSON.stringify(obj)}, received ${JSON.stringify(doneAndDate)}`);
                 return res.send(JSON.stringify(doneAndDate));
             } catch (e) {
-                return utils.handleError.call(me, e);
+                // return utils.handleError.call(me, e);
+                return res.send(JSON.stringify(obj));
             }
         }
     });
