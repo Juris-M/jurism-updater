@@ -60,25 +60,25 @@ router.get('/pollserver', function(req, res, next) {
     this.res = res;
     var me = this;
     res.format({
-        'text/plain': async function() {
+        'text/plain': function() {
             // This is used only for a complete database regenerate.
             // It needs some fixing, though, here or elsewhere, because there
             // are now THREE database tables to rebuild, not one. So what
             // is "goal" value?
-            try {
-                var goal = req.query.goal;
-                var obj = {
-                    goal: req.query.goal,
-                    targets: req.query.targets.split(","),
-                    count: parseInt(req.query.count)
-                };
-                var doneAndDate = await repo_kit.checkTables(obj);
-                console.log(`checkTables: had ${JSON.stringify(obj)}, received ${JSON.stringify(doneAndDate)}`);
-                return res.send(JSON.stringify(doneAndDate));
-            } catch (e) {
-                // return utils.handleError.call(me, e);
-                return res.send(JSON.stringify(obj));
-            }
+            var goal = req.query.goal;
+            var obj = {
+                goal: req.query.goal,
+                targets: req.query.targets.split(","),
+                count: parseInt(req.query.count)
+            };
+            var doneAndDate = repo_kit.checkTables(obj)
+                    .then((doneAndDate) => {
+                        console.log(`checkTables: had ${JSON.stringify(obj)}, received ${JSON.stringify(doneAndDate)}`);
+                        res.send(JSON.stringify(doneAndDate));
+                    })
+                    .catch((e) => {
+                        utils.handleError.call(me, e);
+                    });
         }
     });
 });
