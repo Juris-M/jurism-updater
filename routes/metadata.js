@@ -41,7 +41,7 @@ router.get('/', function(req, res, next) {
             try {
                 var results = await query(sql, [last]);
                 var ret = [];
-                for (var result of results[0]) {
+                for (var result of results) {
                     ret.push(utils.composeMetadataBlock(result));
                 }
                 return res.send(ret);

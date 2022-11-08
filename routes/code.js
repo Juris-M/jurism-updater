@@ -19,9 +19,9 @@ router.get('/*', function(req, res, next) {
             try {
                 var results = await query(sql, [translatorID]);
                 var obj = {};
-                var result = results[0][0];
+                var result = results[0];
                 var metadata = utils.composeMetadataBlock(result, true);
-                var code = results[0][0].code.toString().trim();
+                var code = results[0].code.toString().trim();
                 var ret = metadata + "\n\n" + code;
                 return res.send(ret);
             } catch(e) {
