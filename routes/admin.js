@@ -25,7 +25,7 @@ var useBasicAuth = basicAuth({
 router.get('/', useBasicAuth, async function(req, res, next) {
     // POLL server for incomplete generate, show progres. Otherwise show
     // menu.
-    await sql_kit.assureAllTables();
+    await sql_kit.assureAllTables(pth);
     res.render('admin', { title: 'Juris-M Translator Database Administration', subFolder: "" });
 });
 
@@ -73,7 +73,7 @@ router.get('/pollserver', function(req, res, next) {
             };
             var doneAndDate = repo_kit.checkTables(obj)
                     .then((doneAndDate) => {
-                        console.log(`checkTables: had ${JSON.stringify(obj)}, received ${JSON.stringify(doneAndDate)}`);
+                        // console.log(`checkTables: had ${JSON.stringify(obj)}, received ${JSON.stringify(doneAndDate)}`);
                         res.send(JSON.stringify(doneAndDate));
                     })
                     .catch((e) => {
