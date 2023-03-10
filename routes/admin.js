@@ -9,6 +9,7 @@ var pth = require(path.join(__dirname, '..', 'lib', 'paths.js'));
 var bug_kit = require(pth.fp.bug_kit);
 var repo_kit = require(pth.fp.repo_kit);
 var utils = require(pth.fp.utils);
+var sql_kit = require(pth.fp.sql_kit);
 
 var basicAuth = require('express-basic-auth');
 var config = JSON.parse(fs.readFileSync(pth.fp.config));
@@ -21,9 +22,10 @@ var useBasicAuth = basicAuth({
 })
 
 /* GET admin page. */
-router.get('/', useBasicAuth, function(req, res, next) {
+router.get('/', useBasicAuth, async function(req, res, next) {
     // POLL server for incomplete generate, show progres. Otherwise show
     // menu.
+    await sql_kit.assureTables();
     res.render('admin', { title: 'Juris-M Translator Database Administration', subFolder: "" });
 });
 
