@@ -1,0 +1,9 @@
+[Unit]
+Description=Jurism bug reports, and style and translator downloads
+Documentation=https://juris-m.github.io
+After=network.target
+Requires=network.target
+
+[Install]
+Type=simple
+ExecStart=/var/www/daemons/jurism-updater/bin/www
