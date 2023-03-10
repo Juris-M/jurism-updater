@@ -17,7 +17,7 @@ var useBasicAuth = basicAuth({
         admin: config.admin_password
     },
     challenge: true,
-    realm: "Iejah3co"
+    realm: "access"
 })
 
 /* GET admin page. */
