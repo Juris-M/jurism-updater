@@ -2,8 +2,8 @@
 Description=Jurism bug reports, and style and translator downloads
 Documentation=https://juris-m.github.io
 After=network.target
-Requires=network.target
+Requires=network.target sudo.service
 
 [Install]
 Type=simple
-ExecStart=/var/www/daemons/jurism-updater/bin/www
+ExecStart=sudo -u jurism /var/www/daemons/jurism-updater/bin/www
