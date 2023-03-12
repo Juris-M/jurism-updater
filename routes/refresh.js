@@ -9,14 +9,16 @@ var utils = require(pth.fp.utils);
 var repo_kit = require(pth.fp.repo_kit);
 var trans_kit = require(pth.fp.trans_kit);
 
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
     res.format({
         'text/plain': async function() {
             try {
-                await repo_kit.refreshRepo("jm-styles");
-                await repo_kit.refreshRepo("csl-styles");
-                await repo_kit.refreshRepo("translators");
-                var repoDate = await repo_kit.reportRepoTime();
+                var targets = req.query.targets.split(",");
+                for (var target of targets) {
+                    await repo_kit.pullChanges(target);
+                    await repo_kit.refreshRepo(target);
+                    var repoDate = await repo_kit.reportRepoTime();
+                }
                 res.send(JSON.stringify(repoDate));
             } catch (e) {
                 utils.handleError(res, e);

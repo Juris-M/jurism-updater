@@ -9,6 +9,7 @@ function setListeners() {
         $('.showbug').hide();
         $('.showerror').hide();
     }
+    /*
     function pollServer(obj) {
         return setTimeout(function(){
             obj = JSON.parse(JSON.stringify(obj));
@@ -29,8 +30,9 @@ function setListeners() {
             });
         }, 10000);
     };
+    */
     
-    $('#generate').on('click', function(event){
+    $('#rebuild').on('click', function(event){
         var targets = $('input[type=checkbox]:checked').map(function(_, el) {
             return $(el).val();
         }).get();

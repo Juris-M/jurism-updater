@@ -1,11 +1,16 @@
 [Unit]
 Description=Jurism bug reports, and style and translator downloads
 Documentation=https://juris-m.github.io
-After=network.target
-Requires=network.target
+After=network.target mysql.service
 
 [Service]
-Type=simple
+Type=idle
 User=jurism
 Group=jurism
 ExecStart=/var/www/daemons/jurism-updater/bin/www
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=
+Also=
+Alias=

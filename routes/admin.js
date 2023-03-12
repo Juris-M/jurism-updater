@@ -29,60 +29,6 @@ router.get('/', useBasicAuth, async function(req, res, next) {
     res.render('admin', { title: 'Juris-M Translator Database Administration', subFolder: "" });
 });
 
-/* GET regenerate database op. */
-// Latency is a big problem with this. Rebuilding the database can
-// take two to five minutes.
-// Connection timeouts are buried deep in the tools, and apparently in
-// multiple layers. Ninety seconds to two minutes is about the best we
-// can get.
-// So we need to kick off the process, and then poll the server
-// re progress until it's complete.
-router.get('/generate', function(req, res, next) {
-    this.res = res;
-    var me = this;
-    res.format({
-        'text/plain': async function() {
-            generateInProgress = true;
-            // Kick off the build process
-            // Starts the rebuild promise chain on the server,
-            // and reports back the number of translators to be
-            // added to the database
-            try {
-                var targets = req.query.targets.split(",");
-                var goalObj = await repo_kit.recreateTables(targets);
-                return res.send(JSON.stringify(goalObj));
-            } catch (e) {
-                return utils.handleError(res, e);
-            }
-        }
-    });
-});
-
-router.get('/pollserver', function(req, res, next) {
-    res.format({
-        'text/plain': function() {
-            // This is used only for a complete database regenerate.
-            // It needs some fixing, though, here or elsewhere, because there
-            // are now THREE database tables to rebuild, not one. So what
-            // is "goal" value?
-            var goal = req.query.goal;
-            var obj = {
-                goal: req.query.goal,
-                targets: req.query.targets.split(","),
-                count: parseInt(req.query.count)
-            };
-            var doneAndDate = repo_kit.checkTables(obj)
-                    .then((doneAndDate) => {
-                        // console.log(`checkTables: had ${JSON.stringify(obj)}, received ${JSON.stringify(doneAndDate)}`);
-                        res.send(JSON.stringify(doneAndDate));
-                    })
-                    .catch((e) => {
-                        utils.handleError(res, e);
-                    });
-        }
-    });
-});
-
 /* GET report repo date and time op. */
 router.get('/inspect', function(req, res, next) {
     this.res = res;
