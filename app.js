@@ -10,6 +10,7 @@ var debug = require('debug')('jurism-updater:server');
 var index = require('./routes/index');
 var admin = require('./routes/admin');
 var refresh = require('./routes/refresh');
+var rebuild = require('./routes/rebuild');
 var report = require('./routes/report');
 var updated = require('./routes/updated');
 var keyreturn = require('./routes/keyreturn');
@@ -46,6 +47,7 @@ app.use('/updater', express.static(path.join(__dirname, 'public')));
 
 app.use('/updater/admin', admin);
 app.use('/updater/report', report);
+app.use('/updater/refresh', rebuild);
 app.use('/updater/refresh', refresh);
 app.use('/updater/updated', updated);
 app.use('/updater/keyreturn', keyreturn);
