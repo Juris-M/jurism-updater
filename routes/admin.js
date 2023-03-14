@@ -23,8 +23,32 @@ var useBasicAuth = basicAuth({
 
 /* GET admin page. */
 router.get('/', useBasicAuth, async function(req, res, next) {
-    await repo_kit.assureAllTables(pth);
-    res.render('admin', { title: 'Juris-M Translator Database Administration', subFolder: "" });
+    var status = process.env.JURISM_UPDATER_STATUS;
+    if (!status) {
+    	// If no status marker, something is really weird and wrong
+        res.render('error',
+        {
+	    title: "Jurism Error"
+	});
+    } else if (status.match(/^[0-9]+$/)) {
+    	// If status marker is a number, a job is in progress
+        res.render('progress',
+	{
+	    title: "Update in Progress"
+	});
+    } else if (status !== "done") {
+        // Any string that is not "done" is an error message
+	res.render('error',
+	{
+	    title: "Jurism Error",
+	    message: status
+	});
+    } else {
+        res.render('admin',
+	{ 
+            title: 'Jurism Translator Database Administration'
+        });
+    }
 });
 
 /* GET report repo date and time op. */

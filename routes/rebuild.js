@@ -24,17 +24,30 @@ var sql_kit = require(pth.fp.sql_kit);
  *    a. on error returns an error message for display, or
  *    b. on success updates the repo date and time
  */
-router.get('/', async function(req, res) {
+router.get('/', function(req, res) {
     this.res = res;
     var me = this;
     res.format({
-        'text/plain': async function() {
+        'text/plain': function() {
+		var status = process.env.JURISM_UPDATER_STATUS;
+		if (status && typeof status === "string") {
+			if (status.match(/^[0-9]+$/)) {
+				// job in progress
+			} else if () {
+				// error
+			}
+		} else {
+			// Show admin page in full
+		}
+	
+	// The stuff below happens on server-side, and
+	// should not appear here.
             try {
                 var targets = req.query.targets.split(",");
                 for (var target of targets) {
                     await repo_kit.deleteRows(target);
                     await repo_kit.pullChanges(target);
-                    var filenames = await repo_kit.getFileList(target);
+                    var filenames = repo_kit.getFileList(target);
                     for (var fn of filenames) {
                         var fieldVals = await repo_kit.scrapeFile(target, fn);
                         await repo_kit.addRow(target, fieldVals);

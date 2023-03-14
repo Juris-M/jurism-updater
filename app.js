@@ -7,6 +7,8 @@ var bodyParser = require('body-parser');
 
 var debug = require('debug')('jurism-updater:server');
 
+process.env.JURISM_UPDATER_STATUS = "done";
+
 var index = require('./routes/index');
 var admin = require('./routes/admin');
 var refresh = require('./routes/refresh');
