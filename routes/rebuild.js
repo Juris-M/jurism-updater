@@ -32,20 +32,21 @@ router.get('/', async function(req, res) {
             try {
                 var targets = req.query.targets.split(",");
                 for (var target of targets) {
-                    var info = repo_kit.TARGET[target];
                     await repo_kit.deleteRows(target);
                     await repo_kit.pullChanges(target);
-                    var filenames = repo_kit.getFileList(target);
+                    var filenames = await repo_kit.getFileList(target);
                     for (var fn of filenames) {
-                        var fieldVals = repo_kit.scrapeFile(target, fn);
+                        var fieldVals = await repo_kit.scrapeFile(target, fn);
                         await repo_kit.addRow(target, fieldVals);
                     }
                 }
-                var complete = await utils.reportRepoTime(true);
+                var complete = await repo_kit.reportRepoTime(true);
                 res.send(JSON.stringify(complete));
             } catch (e) {
                 utils.handleError(res, e);
             }
         }
     });
-}
+});
+
+module.exports = router;

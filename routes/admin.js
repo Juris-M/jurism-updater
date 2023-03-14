@@ -23,9 +23,7 @@ var useBasicAuth = basicAuth({
 
 /* GET admin page. */
 router.get('/', useBasicAuth, async function(req, res, next) {
-    // POLL server for incomplete generate, show progres. Otherwise show
-    // menu.
-    await sql_kit.assureAllTables(pth);
+    await repo_kit.assureAllTables(pth);
     res.render('admin', { title: 'Juris-M Translator Database Administration', subFolder: "" });
 });
 

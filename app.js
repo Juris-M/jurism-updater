@@ -47,7 +47,7 @@ app.use('/updater', express.static(path.join(__dirname, 'public')));
 
 app.use('/updater/admin', admin);
 app.use('/updater/report', report);
-app.use('/updater/refresh', rebuild);
+app.use('/updater/rebuild', rebuild);
 app.use('/updater/refresh', refresh);
 app.use('/updater/updated', updated);
 app.use('/updater/keyreturn', keyreturn);
