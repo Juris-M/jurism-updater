@@ -1,3 +1,40 @@
+var _checkServer = (obj) => {
+    var ret = false;
+    if (obj.error) {
+        $('.showerror p').empty();
+        $('.showerror p').append(obj.error);
+        $('.loader').hide();
+        $('.showerror').show();
+        ret = false;
+    } else if (obj.progress) {
+        $('.details').hide();
+        $('.loader').show();
+        ret = true;
+    } else {
+        $('#repo-date').html(obj.human);
+        $('#repo-time').html(obj.machine);
+        $('.loader').hide();
+        $('.details').show();
+        ret = false;
+    }
+    return ret;
+};
+
+var checkServer = () => {
+    $.getJSON('/updater/admin/inspect', null, function(obj){
+        if (_checkServer(obj)) {
+            pollServer();
+        }
+    });
+    
+};
+
+var pollServer = () => {
+    setTimeout(() => {
+        checkServer();
+    }, 3000);
+};
+
 function setListeners() {
 
     /*
@@ -16,43 +53,6 @@ OR
     }
     */
 
-    var _checkServer = (obj) => {
-        var ret = false;
-        if (obj.error) {
-            $('.showerror p').empty();
-            $('.showerror p').append(obj.error);
-            $('.loader').hide();
-            $('.showerror').show();
-            ret = false;
-        } else if (obj.progress) {
-            $('.details').hide();
-            $('.loader').show();
-            ret = true;
-        } else {
-            $('#repo-date').html(obj.human);
-            $('#repo-time').html(obj.machine);
-            $('.loader').hide();
-            $('.details').show();
-            ret = false;
-        }
-        return ret;
-    };
-    
-    var checkServer = () => {
-        $.getJSON('/updater/admin/inspect', null, function(obj){
-            if (_checkServer(obj)) {
-                pollServer();
-            }
-        });
-        
-    };
-    
-    var pollServer = () => {
-        setTimeout(() => {
-            checkServer();
-        }, 3000);
-    };
-    
     function hideAll(){
         $('.details').hide();
         $('.loader').hide();
