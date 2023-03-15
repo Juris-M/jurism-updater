@@ -1,3 +1,15 @@
+disableAll = () => {
+    console.log("DISABLE");
+    $(".onoff").addClass("off");
+    $(".onoff").prop("disabled", true);
+}
+
+enableAll = () => {
+    $(".onoff").prop("disabled", false);
+    $(".onoff").removeClass("off");
+    console.log("ENABLE");
+}
+
 var _checkServer = (obj) => {
     var ret = false;
     if (obj.error) {
@@ -5,16 +17,19 @@ var _checkServer = (obj) => {
         $('.showerror p').append(obj.error);
         $('.loader').hide();
         $('.showerror').show();
+        disableAll();
         ret = false;
     } else if (obj.progress) {
         $('.details').hide();
         $('.loader').show();
+        disableAll();
         ret = true;
     } else {
         $('#repo-date').html(obj.human);
         $('#repo-time').html(obj.machine);
         $('.loader').hide();
         $('.details').show();
+        enableAll();
         ret = false;
     }
     return ret;
@@ -32,7 +47,7 @@ var checkServer = () => {
 var pollServer = () => {
     setTimeout(() => {
         checkServer();
-    }, 3000);
+    }, 30000);
 };
 
 function setListeners() {
@@ -73,6 +88,7 @@ OR
         // Need also to disable check-boxes and buttons here!
         
         $('.loader').show();
+	disableAll();
         $.getJSON(`/updater/rebuild?targets=${targets}`, null, function(obj){
             pollServer(obj);
         });
@@ -82,11 +98,13 @@ OR
         $('.loader').show();
         $.getJSON('/updater/refresh', null, function(obj){
             if (obj.error) {
+	        disableAll();
                 $('.showerror p').empty();
                 $('.showerror p').append(obj.error);
                 $('.loader').hide();
                 $('.showerror').show();
             } else {
+	        enableAll();
                 $('#repo-date').html(obj.human);
                 $('#repo-time').html(obj.machine);
                 $('.loader').hide();

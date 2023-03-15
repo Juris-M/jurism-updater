@@ -71,3 +71,13 @@ dt {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+button.off {
+    background-color:#ff9c9c;
+    cursor: not-allowed;
+}
+
+button.off:hover {
+    background-color:#ff9c9c;
+    cursor: not-allowed;
+}

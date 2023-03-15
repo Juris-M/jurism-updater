@@ -1,24 +1,24 @@
 <div class="center">
   <div class="checkboxes">
-    <input name="repos" type="checkbox" id="translators" value="translators"/>
+    <input name="repos" disabled=true class="onoff" type="checkbox" id="translators" value="translators"/>
     <label for="translators">Translators</label>
-    <input name="repos" type="checkbox" id="csl-styles" value="csl-styles"/>
+    <input name="repos" disabled=true class="onoff" type="checkbox" id="csl-styles" value="csl-styles"/>
     <label for="csl-styles">CSL Styles</label>
-    <input name="repos" type="checkbox" id="jm-styles" value="jm-styles"/>
+    <input name="repos" disabled=true class="onoff" type="checkbox" id="jm-styles" value="jm-styles"/>
     <label for="jm-styles">Jurism Styles</label>
-    <input hidden="true" name="repos" type="checkbox" id="jm-modules" value="jm-modules"/>
+    <input hidden="true" disabled=true class="repo" name="repos" type="checkbox" id="jm-modules" value="jm-modules"/>
     <label hidden="true" for="jm-modules">Jurism Modules</label>
   </div>
   <div class="button">
-    <input id="rebuild" type="button" value="Rebuild"/>
+    <input class="onoff" id="rebuild" type="button" value="Rebuild"/>
   </div>
 
   <div class="button">
-    <input id="refresh" type="button" value="Refresh"/>
+    <input class="onoff" id="refresh" type="button" value="Refresh"/>
   </div>
 
   <div class="button">
-    <input id="bugs" type="button" value="Bugs"/>
+    <input class="onoff" id="bugs" type="button" value="Bugs"/>
   </div>
 
   <div class="loader" style="display:none;"></div>
