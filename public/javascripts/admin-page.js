@@ -1,13 +1,11 @@
-disableAll = () => {
-    console.log("DISABLE");
+var disableAll = () => {
     $(".onoff").addClass("off");
     $(".onoff").prop("disabled", true);
 }
 
-enableAll = () => {
+var enableAll = () => {
     $(".onoff").prop("disabled", false);
     $(".onoff").removeClass("off");
-    console.log("ENABLE");
 }
 
 var _checkServer = (obj) => {
@@ -53,19 +51,11 @@ var pollServer = () => {
 function setListeners() {
 
     /*
-    Return obj:
-    {
-        error: STR message
-    }
+    Return obj: { error: STR message }
 OR
-    {
-        progress: NUM 1-100,
-    }
+    { progress: NUM 1-100 }
 OR
-    {
-        human: DATE,
-        machine: DATE
-    }
+    { human: DATE, machine: DATE }
     */
 
     function hideAll(){
@@ -84,43 +74,27 @@ OR
         if (!targets) return;
 
         hideAll();
-
-        // Need also to disable check-boxes and buttons here!
-        
         $('.loader').show();
-	disableAll();
+        disableAll();
         $.getJSON(`/updater/rebuild?targets=${targets}`, null, function(obj){
             pollServer(obj);
         });
     });
     $('#refresh').on('click', function(event){
+        var targets = $('input[type=checkbox]:checked').map(function(_, el) {
+            return $(el).val();
+        }).get();
+        targets = targets.join(",");
+        if (!targets) return;
+
         hideAll();
         $('.loader').show();
-        $.getJSON('/updater/refresh', null, function(obj){
-            if (obj.error) {
-	        disableAll();
-                $('.showerror p').empty();
-                $('.showerror p').append(obj.error);
-                $('.loader').hide();
-                $('.showerror').show();
-            } else {
-	        enableAll();
-                $('#repo-date').html(obj.human);
-                $('#repo-time').html(obj.machine);
-                $('.loader').hide();
-                $('.details').show();
-            }
+        disableAll();
+        $.getJSON('/updater/refresh?targets=${targets}', null, function(obj){
+            pollServer(obj);
         });
     });
-    $('#inspect').on('click', function(event){
-        hideAll();
-        
-        // Factor this out to a separate checkServer function
-        // that runs once at page load, and iteratively if
-        // updates are done and no errors exist. We'll no longer
-        // need the check-time button.
-        
-    });
+
     $('#bugs').on('click', function(event){
         hideAll();
         $.getJSON('/updater/admin/bugs', null, function(bugs){
