@@ -46,7 +46,6 @@ app.use('/updater/styles', express.static(path.join(__dirname, 'jm-styles'), {
 
 app.use('/updater', express.static(path.join(__dirname, 'public')));
 
-
 app.use('/updater/admin', admin);
 app.use('/updater/report', report);
 app.use('/updater/rebuild', rebuild);

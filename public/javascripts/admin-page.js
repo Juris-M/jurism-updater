@@ -1,6 +1,57 @@
 function setListeners() {
 
-    var timeout;
+    /*
+    Return obj:
+    {
+        error: STR message
+    }
+OR
+    {
+        progress: NUM 1-100,
+    }
+OR
+    {
+        human: DATE,
+        machine: DATE
+    }
+    */
+
+    var _checkServer = (obj) => {
+        var ret = false;
+        if (obj.error) {
+            $('.showerror p').empty();
+            $('.showerror p').append(obj.error);
+            $('.loader').hide();
+            $('.showerror').show();
+            ret = false;
+        } else if (obj.progress) {
+            $('.details').hide();
+            $('.loader').show();
+            ret = true;
+        } else {
+            $('#repo-date').html(obj.human);
+            $('#repo-time').html(obj.machine);
+            $('.loader').hide();
+            $('.details').show();
+            ret = false;
+        }
+        return ret;
+    };
+    
+    var checkServer = () => {
+        $.getJSON('/updater/admin/inspect', null, function(obj){
+            if (_checkServer(obj)) {
+                pollServer();
+            }
+        });
+        
+    };
+    
+    var pollServer = () => {
+        setTimeout(() => {
+            checkServer();
+        }, 3000);
+    };
     
     function hideAll(){
         $('.details').hide();
@@ -9,7 +60,7 @@ function setListeners() {
         $('.showbug').hide();
         $('.showerror').hide();
     }
-    
+
     $('#rebuild').on('click', function(event){
         var targets = $('input[type=checkbox]:checked').map(function(_, el) {
             return $(el).val();
@@ -18,19 +69,12 @@ function setListeners() {
         if (!targets) return;
 
         hideAll();
+
+        // Need also to disable check-boxes and buttons here!
+        
         $('.loader').show();
         $.getJSON(`/updater/rebuild?targets=${targets}`, null, function(obj){
-            if (obj.error) {
-                $('.showerror p').empty();
-                $('.showerror p').append(obj.error);
-                $('.loader').hide();
-                $('.showerror').show();
-            } else {
-                $('#repo-date').html(obj.human);
-                $('#repo-time').html(obj.machine);
-                $('.loader').hide();
-                $('.details').show();
-            }
+            pollServer(obj);
         });
     });
     $('#refresh').on('click', function(event){
@@ -52,20 +96,12 @@ function setListeners() {
     });
     $('#inspect').on('click', function(event){
         hideAll();
-        $.getJSON('/updater/admin/inspect', null, function(obj){
-            if (obj.error) {
-                console.log(obj.error);
-                $('.showerror p').empty();
-                $('.showerror p').append(obj.error);
-                $('.loader').hide();
-                $('.showerror').show();
-            } else {
-                $('#repo-date').html(obj.human);
-                $('#repo-time').html(obj.machine);
-                $('.loader').hide();
-                $('.details').show();
-            }
-        });
+        
+        // Factor this out to a separate checkServer function
+        // that runs once at page load, and iteratively if
+        // updates are done and no errors exist. We'll no longer
+        // need the check-time button.
+        
     });
     $('#bugs').on('click', function(event){
         hideAll();

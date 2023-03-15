@@ -21,45 +21,37 @@ var useBasicAuth = basicAuth({
     realm: "access"
 })
 
+/*
+ * This is stuff sent BY the server.
+ */
+
 /* GET admin page. */
 router.get('/', useBasicAuth, async function(req, res, next) {
-    var status = process.env.JURISM_UPDATER_STATUS;
-    if (!status) {
-    	// If no status marker, something is really weird and wrong
-        res.render('error',
-        {
-	    title: "Jurism Error"
-	});
-    } else if (status.match(/^[0-9]+$/)) {
-    	// If status marker is a number, a job is in progress
-        res.render('progress',
-	{
-	    title: "Update in Progress"
-	});
-    } else if (status !== "done") {
-        // Any string that is not "done" is an error message
-	res.render('error',
-	{
-	    title: "Jurism Error",
-	    message: status
-	});
-    } else {
-        res.render('admin',
-	{ 
-            title: 'Jurism Translator Database Administration'
-        });
-    }
+    res.render('admin',
+	           { 
+                   title: 'Jurism Translator Database Administration'
+               });
 });
 
-/* GET report repo date and time op. */
+/* Check status, report for display on browser page */
 router.get('/inspect', function(req, res, next) {
     this.res = res;
     var me = this;
     res.format({
         'text/plain': async function(){
             try {
-                var repoDate = await repo_kit.reportRepoTime();
-                return res.send(JSON.stringify(repoDate));
+                var obj = {};
+                var status = process.env.JURISM_UPDATER_STATUS;
+                if (!status) {
+                    obj.error = "Error: no status reported by server ... ?";
+                } else if (status.match(/^[0-9]+$/)) {
+                    obj.progress = parseInt(status, 10);
+                } else if (status !== "done") {
+                    obj.error = status;
+                } else {
+                    obj = await repo_kit.reportRepoTime();
+                }
+                return res.send(JSON.stringify(obj));
             } catch (e) {
                 return utils.handleError(res, e);
             }
