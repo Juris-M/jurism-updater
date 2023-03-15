@@ -4,7 +4,6 @@
  * Module dependencies.
  */
 
-console.log("Starting...");
 var app = require('../app');
 var debug = require('debug')('jurism-updater:server');
 var http = require('http');

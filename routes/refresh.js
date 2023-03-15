@@ -42,6 +42,7 @@ var doRefresh = async (req) => {
                 switch (mode) {
                 case ("M"):
                 case ("A"):
+		    // console.log(`WTF? ${hashes[target]} ${mode} ${target} ${fn}`);
                     var fieldVals = repo_kit.scrapeFile(target, fn);
                     await repo_kit.addRow(target, fieldVals);
                     break;

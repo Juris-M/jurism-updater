@@ -45,7 +45,7 @@ var checkServer = () => {
 var pollServer = () => {
     setTimeout(() => {
         checkServer();
-    }, 30000);
+    }, 15000);
 };
 
 function setListeners() {
@@ -90,7 +90,7 @@ OR
         hideAll();
         $('.loader').show();
         disableAll();
-        $.getJSON('/updater/refresh?targets=${targets}', null, function(obj){
+        $.getJSON(`/updater/refresh?targets=${targets}`, null, function(obj){
             pollServer(obj);
         });
     });
