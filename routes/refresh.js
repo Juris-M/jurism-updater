@@ -10,7 +10,7 @@ var repo_kit = require(pth.fp.repo_kit);
 var trans_kit = require(pth.fp.trans_kit);
 var gitter = require(pth.fp.git_kit);
 
-var doRefresh = async (req) => {
+var doRefresh = async (req, res) => {
     try {
         var targets = req.query.targets.split(",");
         var total = 1;
@@ -43,7 +43,7 @@ var doRefresh = async (req) => {
                 case ("M"):
                 case ("A"):
 		    // console.log(`WTF? ${hashes[target]} ${mode} ${target} ${fn}`);
-                    var fieldVals = repo_kit.scrapeFile(target, fn);
+                    var fieldVals = repo_kit.scrapeFile(res, target, fn);
                     await repo_kit.addRow(target, fieldVals);
                     break;
                 case ("D"):
@@ -69,7 +69,7 @@ router.get('/', function(req, res) {
             var status = process.env.JURISM_UPDATER_STATUS;
             if (status && status === "done") {
                 process.env.JURISM_UPDATER_STATUS = status = "1";
-                doRefresh(req);
+                doRefresh(req, res);
             }
             res.send(JSON.stringify({process: status }));
         }

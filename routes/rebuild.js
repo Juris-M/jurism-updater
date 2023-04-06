@@ -35,7 +35,7 @@ var sql_kit = require(pth.fp.sql_kit);
  * and where flow goes to.
  */
 
-var doRebuild = async (req) => {
+var doRebuild = async (req, res) => {
     try {
         var targets = req.query.targets.split(",");
         // Get total number of files
@@ -50,7 +50,7 @@ var doRebuild = async (req) => {
             await repo_kit.pullChanges(target);
             var filenames = repo_kit.getFileList(target);
             for (var fn of filenames) {
-                var fieldVals = await repo_kit.scrapeFile(target, fn);
+                var fieldVals = await repo_kit.scrapeFile(res, target, fn);
                 await repo_kit.addRow(target, fieldVals);
                 count += 1;
                 process.env.JURISM_UPDATER_STATUS = count.toString();
@@ -83,7 +83,7 @@ router.get('/', function(req, res) {
             var status = process.env.JURISM_UPDATER_STATUS;
             if (status && status === "done") {
                 process.env.JURISM_UPDATER_STATUS = status = "1";
-                doRebuild(req);
+                doRebuild(req, res);
             }
             res.send(JSON.stringify({process: status }));
         }
